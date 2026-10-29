@@ -86,6 +86,29 @@ def state_directory(connection):
     return default_cache().parent/'setup-state'/key
 
 
+def installed_lora_profile(connection=None):
+    """Use the completed setup choice for new videos; never change saved jobs."""
+    if connection is None:
+        from .runtime_settings import RUNTIME
+        connection=RUNTIME
+    path=state_directory(connection)/'state.json'
+    if not path.exists():return 'unlocked_v2'
+    try:
+        state=json.loads(path.read_text(encoding='utf-8'))
+        if (not isinstance(state,dict) or state.get('root')!=str(connection.root)
+                or state.get('profile')!=recipe()['profile']):raise ValueError()
+        if state.get('state')!='dependencies_ready':return 'unlocked_v2'
+        from .lora_setup import model
+        for profile in ('unlocked_v2','restoration'):
+            selected=model(profile)
+            expected={'id':selected.id,'model_id':selected.model_id,'version_id':selected.version_id,
+                      'file_id':selected.file_id,'sha256':selected.sha256,'terms_url':selected.terms_url}
+            if state.get('main_lora')==expected:return profile
+    except (OSError,ValueError,TypeError):
+        pass
+    raise SetupError('導入済みLoRAの選択記録を確認できません。セットアップ画面で選択した環境と主LoRAを確認してください')
+
+
 def kernel_requirements(data):
     from packaging.requirements import Requirement
     from packaging.utils import canonicalize_name

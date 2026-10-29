@@ -69,7 +69,11 @@ def request(operation, data):
         return {**result["streams"][0], "duration": result.get("format", {}).get("duration")}
     if operation == "options":
         from .processing_options import resolve_options
-        return resolve_options(data.get("processing_options")).to_dict()
+        options=data.get("processing_options")
+        if options is None:
+            from .setup_environment import installed_lora_profile
+            options={"lora_profile":installed_lora_profile()}
+        return resolve_options(options).to_dict()
     if operation == "execute":
         return execute(data)
     if operation == "cleanup":

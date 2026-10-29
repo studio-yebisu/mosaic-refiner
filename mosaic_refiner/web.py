@@ -19,6 +19,11 @@ from .processing_options import resolve_options, catalog
 from .h3_lora_profiles import available_profiles
 
 
+def initial_options():
+    from .setup_environment import installed_lora_profile
+    return resolve_options({'lora_profile':installed_lora_profile()})
+
+
 class Controller:
     def __init__(self, directory, backend="h3"):
         self.directory = Path(directory)
@@ -64,7 +69,7 @@ class Controller:
             from .learned_detection import model_path
             from .restoration_models import ready as restoration_ready
             options = (resolve_options(self.session['spec'].get('processing_options')) if self.session
-                       else resolve_options())
+                       else initial_options())
             return {**self.state, "busy": self.busy(), "uploading": self.uploading,
                     "pipeline_revision": "h3-setup-v5",
                     "processing_presets": catalog(),
@@ -112,7 +117,7 @@ class Controller:
             raise ValueError("映像streamを読み取れません")
         video = streams[0]
         spec = new_job(source, self.directory / "jobs")
-        spec.update(backend=self.backend, context_seconds="auto", processing_options=resolve_options().to_dict())
+        spec.update(backend=self.backend, context_seconds="auto", processing_options=initial_options().to_dict())
         session = {"spec":spec,"name":name,"width":video["width"],"height":video["height"],
                    "duration":metadata.get("format",{}).get("duration"),"preview":None,
                    "preview_enabled":False,"copied_input":copied,"id":identifier}

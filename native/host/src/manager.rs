@@ -806,7 +806,8 @@ impl Host {
     pub fn select(&self, source: PathBuf, name: String, copied: bool) -> Result<Value, String> {
         let source = absolute(&source)?;
         let meta = self.runtime.rpc("probe", json!({"source":source}))?;
-        let spec = new_spec(&source, &self.directory, &self.backend)?;
+        let mut spec = new_spec(&source, &self.directory, &self.backend)?;
+        spec["processing_options"] = self.runtime.rpc("options", json!({}))?;
         let session = json!({"spec":spec,"name":name,"width":meta["width"],"height":meta["height"],"duration":meta["duration"],
             "preview":null,"preview_enabled":false,"copied_input":copied,"id":identifier()});
         atomic_json(&self.directory.join("session.json"), &session)?;
