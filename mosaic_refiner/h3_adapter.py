@@ -11,7 +11,7 @@ import json
 from math import ceil, sqrt, isfinite
 from pathlib import Path
 from urllib.error import URLError
-from urllib.request import urlopen
+from .runtime_http import urlopen
 
 from .checkpoint import digest_config, digest_file, implementation_fingerprint
 from .geometry import Rect

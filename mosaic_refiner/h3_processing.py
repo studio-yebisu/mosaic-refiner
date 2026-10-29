@@ -116,10 +116,14 @@ class H3Processor:
                               for key, requests in self.scenes.items()}
 
     def fingerprint(self):
-        return {"runtime": self.runtime.fingerprint(), "requests": self.plan["windows"],
+        from .checkpoint import digest_config
+        # Window input receipts retain the concrete requests. The frequently
+        # rewritten checkpoint needs their identity, not every repeated mask.
+        return {"runtime": self.runtime.fingerprint(), "plan_fingerprint_version":1,
+                "requests_sha256":digest_config(self.plan["windows"]),"request_count":len(self.plan["windows"]),
                 "cpu_core": core_identity(),
                 "bounded_pipeline": {"enabled": self.prefetch, "prepared_capacity": 1, "generated_capacity": 1},
-                "schedule": self.schedule.to_dict() if self.schedule else None}
+                "schedule_sha256":digest_config(self.schedule.to_dict() if self.schedule else None)}
 
     def _prepare_window(self, request, cancelled):
         index = request["window"]["index"]

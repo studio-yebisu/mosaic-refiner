@@ -659,7 +659,9 @@ impl Runtime {
         let timeout = worker_timeout(operation);
         let request = serde_json::to_vec(&json!({"operation":operation,"data":data}))
             .map_err(|e| e.to_string())?;
-        let mut child = WorkerProcess::spawn(&mut command, timeout.is_some())?;
+        // Process ownership is independent of a deadline. Long inference keeps
+        // cooperative cancellation, while host death reaps only our children.
+        let mut child = WorkerProcess::spawn(&mut command, true)?;
         communicate_worker(
             &mut child,
             operation,

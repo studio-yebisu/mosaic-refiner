@@ -47,8 +47,13 @@ class Model:
         relative = PurePosixPath(self.target)
         if relative.is_absolute() or any(x in ('..', '.') for x in relative.parts) or '\\' in self.target:
             raise SetupError("モデル配置先が不正です")
-        target = (root / Path(*relative.parts)).resolve()
-        if root not in target.parents:
+        if not relative.parts or any(':' in part for part in relative.parts):
+            raise SetupError("モデル配置先が不正です")
+        # A user-selected category (models/loras, models/vae, etc.) may be a
+        # junction to shared storage. Descendant/leaf links cannot escape it.
+        base=(root/relative.parts[0]).resolve() if len(relative.parts)>1 else root
+        target=(base/Path(*relative.parts[1:])).resolve() if len(relative.parts)>1 else (root/relative.parts[0]).resolve()
+        if base not in target.parents:
             raise SetupError("モデル配置先がmodelsディレクトリの外です")
         return target
 

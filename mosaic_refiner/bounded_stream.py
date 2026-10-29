@@ -71,16 +71,18 @@ class BoundedStream:
                 raise KeyboardInterrupt
             try:
                 kind, value = self.queue.get(timeout=.05)
-                self.stats["consumer_wait_seconds"] += time.monotonic() - started
-                if kind == "end":
-                    raise StopIteration
-                if kind == "error":
-                    raise value
-                self.stats["consumed"] += 1
-                return value
             except Empty:
                 if not self.thread.is_alive():
-                    raise StopIteration
+                    # The producer can enqueue its final values immediately
+                    # after the timed get expires. Drain before declaring EOF.
+                    try:kind,value=self.queue.get_nowait()
+                    except Empty:raise StopIteration
+                else:continue
+            self.stats["consumer_wait_seconds"] += time.monotonic() - started
+            if kind == "end":raise StopIteration
+            if kind == "error":raise value
+            self.stats["consumed"] += 1
+            return value
         raise StopIteration
 
     def close(self):

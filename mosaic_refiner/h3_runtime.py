@@ -8,7 +8,8 @@ import shutil
 import subprocess
 import time
 import uuid
-from urllib.request import Request, urlopen
+from urllib.request import Request
+from .runtime_http import urlopen
 from urllib.error import HTTPError
 
 from .checkpoint import atomic_json, digest_file

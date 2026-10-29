@@ -26,15 +26,32 @@ def identity(connection=None):
     if parent:candidates.append(Path(parent.exe()).resolve())
     if connection.python not in candidates:
         raise ValueError("ComfyUIが選択したPythonから起動されていません")
+    arguments=process.cmdline()[1:]
+    for flag,expected in (('--base-directory',root),('--models-directory',root/'models'),
+                          ('--input-directory',root/'input'),('--output-directory',root/'output')):
+        value=None
+        for index,arg in enumerate(arguments):
+            option,separator,inline=arg.partition('=')
+            # ComfyUI's argparse accepts unambiguous option abbreviations.
+            if not (option.startswith('--') and len(option)>2 and flag.startswith(option)):continue
+            if not separator:
+                if index+1>=len(arguments):raise ValueError('ComfyUIの起動引数を確認できません: '+flag)
+                value=arguments[index+1]
+            else:value=inline
+        if value is not None:
+            selected=(Path(value) if Path(value).is_absolute() else cwd/value).resolve()
+            if selected!=expected.resolve():
+                raise ValueError('この構成はComfyUIの標準models/input/outputを使います。起動設定の'+flag+'が選択rootと異なります。環境を変更せず確認してください')
     return {"pid": process.pid, "root": str(root), "python": str(connection.python), "endpoint": connection.endpoint,
-            "arguments": process.cmdline()[1:], "ram_total_bytes": psutil.virtual_memory().total,
+            "arguments": arguments, "ram_total_bytes": psutil.virtual_memory().total,
             "ram_available_bytes": psutil.virtual_memory().available}
 
 
 class Observation:
     def __init__(self, token, process_identity):
         import websocket
-        self.socket = websocket.create_connection(process_identity['endpoint'].replace('http://', 'ws://')+f"/ws?clientId={token}", timeout=2)
+        self.socket = websocket.create_connection(process_identity['endpoint'].replace('http://', 'ws://')+f"/ws?clientId={token}", timeout=2,
+                                                  http_no_proxy=['127.0.0.1','::1','localhost'])
         self.identity = process_identity
         self.stop = threading.Event()
         self.started = time.monotonic()

@@ -17,9 +17,11 @@ class MediaError(ValueError):
 
 def command(args: list[str]) -> bytes:
     try:
-        result = subprocess.run(args, capture_output=True, check=False, creationflags=CHILD_FLAGS)
+        result = subprocess.run(args, capture_output=True, check=False, creationflags=CHILD_FLAGS,timeout=3600)
     except FileNotFoundError as exc:
         raise MediaError(f"実行ファイルがありません: {args[0]}") from exc
+    except subprocess.TimeoutExpired:
+        raise MediaError('動画処理コマンドが時間制限を超えました。確定済みの中間データを保全して停止します') from None
     if result.returncode:
         message = result.stderr.decode("utf-8", errors="replace")[-3000:]
         raise MediaError(f"{Path(args[0]).name}に失敗しました: {message}")

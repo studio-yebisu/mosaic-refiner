@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from mosaic_refiner.checkpoint import load_json, atomic_json
+from mosaic_refiner.checkpoint import load_json, atomic_json, digest_config
 from mosaic_refiner.detection import RegionSchedule
 from mosaic_refiner.numeric_qa import frame_statistics
 from mosaic_refiner.native_core import identity as core_identity
@@ -15,11 +15,17 @@ from mosaic_refiner.geometry import Rect
 
 
 def verification_schedule(manifest, job, info):
+    processor=manifest['config'].get('processor',{})
+    has_digest='schedule_sha256' in processor
+    expected=processor.get('schedule_sha256')
     path=job.with_name(job.name+'.analysis.json')
-    if path.is_file():
+    analysis_file=path.is_file()
+    if analysis_file:
         data=load_json(path)
     else:
-        data=manifest['config'].get('processor',{}).get('schedule')
+        if has_digest and expected!=digest_config(None):
+            raise ValueError('自動検出の解析記録がありません。手動領域へ代用せず検査を停止します')
+        data=processor.get('schedule')
         if data is None:
             # Manual CLI jobs deliberately do not produce an auto-detection file.
             config=manifest['config'];roi=Rect(**config['roi'])
@@ -31,6 +37,9 @@ def verification_schedule(manifest, job, info):
                   'scene_cuts':[],'max_gap_frames':end-first,'metadata':{'method':'manual'}}
     schedule=RegionSchedule({int(k):v for k,v in data['records'].items()},
                             data['scene_cuts'],data['max_gap_frames'],data.get('metadata'))
+    if has_digest and (expected!=digest_config(None) or analysis_file):
+        if digest_config(schedule.to_dict())!=expected:
+            raise ValueError('補正領域の解析記録がmanifestのhashと一致しません')
     return schedule,data.get('metadata',{})
 
 

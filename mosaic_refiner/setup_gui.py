@@ -9,7 +9,7 @@ import webbrowser
 
 from .runtime_settings import load, RuntimeConnection, RUNTIME
 from .setup_runtime import resources, resource_status, inspect_nodes
-from .setup_environment import plan, install_all, discovered_servers, recipe, state_directory
+from .setup_environment import plan, install_all, discovered_servers, recipe, state_directory, lora_profile_from_identity
 from .model_auth import AuthError, Credentials, WindowsVault, PROVIDERS, check as check_auth
 from .lora_setup import conditions_text, require_user_key
 from .h3_lora_profiles import H3_TERMS_URL
@@ -32,11 +32,13 @@ class SetupWindow:
         ttk.Label(body,text='お使いのComfyUIはありますか？ 既存環境を選ぶか、このアプリ用に新規導入します。',wraplength=940).pack(anchor='w',pady=6)
         journal=state_directory(current)/'state.json'
         managed_new=False
+        record={}
         if journal.is_file():
             try:
                 record=json.loads(journal.read_text(encoding='utf-8'))
+                if not isinstance(record,dict):raise ValueError('導入記録の形式が不正です')
                 managed_new=(record.get('root')==str(current.root) and record.get('managed_new') is True)
-            except (OSError,ValueError):pass
+            except (OSError,ValueError):record={}
         self.mode=tk.StringVar(value='new' if managed_new or not current.configured else 'existing')
         modes=ttk.Frame(body);modes.pack(fill='x')
         for value,label in (('existing','既存ComfyUIを使う'),('new','ComfyUIを新規導入')):
@@ -54,7 +56,8 @@ class SetupWindow:
         ttk.Label(body,text='新規導入の推奨: NVIDIA Ampere以降・VRAM 24GB・RAM 64GB・空き120GB以上。最低条件はVRAM 12GB / RAM 32GBです。12〜23GBは未検証。NVIDIA R580以降のドライバーは事前に用意してください。',wraplength=940).pack(anchor='w',pady=8)
         row=ttk.Frame(body);row.pack(fill='x',pady=4)
         ttk.Label(row,text='今回導入する主LoRA（必須）',width=30).pack(side='left')
-        self.lora_choice=tk.StringVar(value='Unlocked V2')
+        previous=(record.get('main_lora') or record.get('completed_main_lora')) if record.get('root')==str(current.root) else None
+        self.lora_choice=tk.StringVar(value='DecensoreH3' if lora_profile_from_identity(previous)=='restoration' else 'Unlocked V2')
         choice=ttk.Combobox(row,textvariable=self.lora_choice,values=('Unlocked V2','DecensoreH3'),state='readonly')
         choice.pack(side='left',fill='x',expand=True);self.controls.append(choice);self.readonly_controls.append(choice)
         choice.bind('<<ComboboxSelected>>',lambda event:self.refresh_models())
@@ -88,7 +91,7 @@ class SetupWindow:
         ttk.Button(models,text='選択モデルの配布元・条件を開く',command=self.terms).pack(anchor='w',pady=4)
         ttk.Button(models,text='必須LoRAの作者・固定版・条件の確認状況',command=self.lora_terms).pack(anchor='w')
         ttk.Button(models,text='ComfyUI・ノード・Python・FFmpeg等の条件一覧',command=self.code_terms).pack(anchor='w')
-        ttk.Label(body,text='出力はAIの推測です。Unlocked V2 / DecensoreH3の主LoRA一つと、本人のCivitai API認証が必須です。配布元の条件を確認して導入してください。新規ソフトウェアの導入計画は最新の互換安定版を解決します。',wraplength=940).pack(anchor='w',pady=7)
+        ttk.Label(body,text='出力はAIの推測です。Unlocked V2 / DecensoreH3の主LoRA一つと、本人のCivitai API認証が必須です。配布元の条件を確認して導入してください。導入計画に取得元と版を表示します。',wraplength=940).pack(anchor='w',pady=7)
         self.accepted=tk.BooleanVar(value=False);self.warning_ack=tk.BooleanVar(value=False)
         for text,var in (('各コード・モデル・FFmpeg等の配布元の利用条件を確認しました',self.accepted),
                          ('表示された未検証のGPU / RAM条件を確認して続行します',self.warning_ack)):

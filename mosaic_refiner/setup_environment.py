@@ -47,16 +47,25 @@ def resolve_recipe(connection, new, cancelled=lambda:False, progress=lambda **kw
     with job_lock(folder):
         if path.exists():
             saved = json.loads(path.read_text(encoding='utf-8'))
-            if (saved.get('root') != str(connection.root) or saved.get('new') is not new
+            changed=(saved.get('root') != str(connection.root) or saved.get('new') is not new
                     or saved.get('connection') != connection.to_dict()
                     or saved.get('python_abi') != list(sys.version_info[:2])
-                    or saved.get('recipe',{}).get('profile') != recipe()['profile']):
+                    or saved.get('recipe',{}).get('profile') != recipe()['profile'])
+            if changed and not (folder/'state.json').exists():
+                # Planning has not installed anything. Preserve the old plan and
+                # let the user correct the endpoint/Python before installation.
+                backup=path.with_name(f'resolved-recipe.plan-{time.time_ns()}.json')
+                path.rename(backup)
+            elif changed:
                 raise SetupError('保存された導入計画と環境・方式が異なります。既存記録を保全して確認してください')
-            validate_resolved_recipe(saved['recipe'],new)
-            return saved['recipe']
+            else:
+                validate_resolved_recipe(saved['recipe'],new)
+                validate_source_layout(saved['recipe'],cancelled,progress)
+                return saved['recipe']
         from .setup_latest import resolve_sources
         from .setup_packages import resolve_packages
         resolved = resolve_sources(recipe(), default_cache().parent/'setup-resolution', cancelled, progress)
+        validate_source_layout(resolved,cancelled,progress)
         if new:
             resolved = resolve_packages(resolved, sys.version_info[:3])
         else:
@@ -86,6 +95,18 @@ def state_directory(connection):
     return default_cache().parent/'setup-state'/key
 
 
+def lora_profile_from_identity(value):
+    """Match immutable model identity; display URLs are not execution pins."""
+    if not isinstance(value,dict):return None
+    from .lora_setup import model
+    for profile in ('unlocked_v2','restoration'):
+        selected=model(profile)
+        expected={'id':selected.id,'model_id':selected.model_id,'version_id':selected.version_id,
+                  'file_id':selected.file_id,'sha256':selected.sha256}
+        if all(value.get(k)==v for k,v in expected.items()):return profile
+    return None
+
+
 def installed_lora_profile(connection=None):
     """Use the completed setup choice for new videos; never change saved jobs."""
     if connection is None:
@@ -97,16 +118,33 @@ def installed_lora_profile(connection=None):
         state=json.loads(path.read_text(encoding='utf-8'))
         if (not isinstance(state,dict) or state.get('root')!=str(connection.root)
                 or state.get('profile')!=recipe()['profile']):raise ValueError()
-        if state.get('state')!='dependencies_ready':return 'unlocked_v2'
-        from .lora_setup import model
-        for profile in ('unlocked_v2','restoration'):
-            selected=model(profile)
-            expected={'id':selected.id,'model_id':selected.model_id,'version_id':selected.version_id,
-                      'file_id':selected.file_id,'sha256':selected.sha256,'terms_url':selected.terms_url}
-            if state.get('main_lora')==expected:return profile
+        selected=state.get('completed_main_lora')
+        if selected is None and state.get('state')=='dependencies_ready':selected=state.get('main_lora')
+        if selected is None:return 'unlocked_v2'
+        profile=lora_profile_from_identity(selected)
+        if profile:return profile
     except (OSError,ValueError,TypeError):
         pass
     raise SetupError('導入済みLoRAの選択記録を確認できません。セットアップ画面で選択した環境と主LoRAを確認してください')
+
+
+def validate_source_layout(data,cancelled=lambda:False,progress=lambda **kw:None):
+    """Reject missing required source files before creating a GPU environment."""
+    from .setup_runtime import REQUIRED_FILES
+    from .setup_archives import acquire
+    for source in data['sources']:
+        prefix=source['target'].rstrip('/')+'/'
+        required=[name if source['target']=='.' else name[len(prefix):]
+                  for name in REQUIRED_FILES
+                  if (not name.startswith('custom_nodes/') if source['target']=='.' else name.startswith(prefix))]
+        if not required:continue
+        archive=acquire(source,cancelled,progress)
+        with zipfile.ZipFile(archive) as stream:
+            names={name.split('/',1)[1] for name in stream.namelist() if '/' in name and not name.endswith('/')}
+        missing=[name for name in required if name not in names]
+        if missing:
+            raise SetupError('取得したコードに必要なファイルがありません。GPU依存の導入前に停止します: '
+                             +source['repo']+' / '+', '.join(missing))
 
 
 def kernel_requirements(data):
@@ -172,9 +210,12 @@ def discovered_servers():
         try:info=p.info
         except (psutil.NoSuchProcess,psutil.AccessDenied):continue
         args=info.get('cmdline') or []
-        if not info.get('cwd') or not any(Path(a).name=='main.py' for a in args): continue
-        root=Path(info['cwd']).resolve()
-        if not (root/'comfy').is_dir() or not (root/'main.py').is_file(): continue
+        if not info.get('cwd') or not any(Path(a).name.casefold()=='main.py' for a in args): continue
+        cwd=Path(info['cwd']).resolve()
+        roots=[(Path(a) if Path(a).is_absolute() else cwd/a).resolve().parent
+               for a in args if Path(a).name.casefold()=='main.py']
+        root=next((r for r in roots if (r/'comfy').is_dir() and (r/'main.py').is_file()),None)
+        if root is None:continue
         if any(r['root']==str(root) for r in result): continue
         try:
             python=Path(p.exe()).resolve()
@@ -318,16 +359,27 @@ def patch_core(connection):
     return {'state':'patched','sha256':spec['after_sha256'],'backup':str(backup)}
 
 
-def install_nodes(connection,cancelled=lambda:False,progress=lambda **kw:None):
+def install_nodes(connection,cancelled=lambda:False,progress=lambda **kw:None,managed_new=False):
     from .setup_runtime import idle
     result=[]
     for spec in recipe()['sources'][1:]:
         idle(connection)
         target=connection.root/spec['target']
-        if connection.root not in target.resolve().parents:raise SetupError('必要ノードの配置先が選択rootの外です')
         progress(phase='必要ノードを導入',model=spec['id'])
-        result.append(verify_existing_source(spec,target,cancelled,progress) if target.exists()
-                      else publish_archive(spec,target,cancelled,progress))
+        if target.exists():
+            if not target.is_dir():raise SetupError('必要ノードの配置先がdirectoryではありません: '+str(target))
+            if managed_new:
+                if connection.root not in target.resolve().parents:
+                    raise SetupError('管理下ノードの配置先が選択rootの外です')
+                result.append(verify_published(spec,target))
+                continue
+            # The user may own a compatible older/Manager installation. Preserve
+            # it and verify required registrations before model acquisition.
+            result.append({'target':spec['target'],'state':'preserved-existing',
+                           'node_registration_check_required':True})
+        else:
+            if connection.root not in target.resolve().parents:raise SetupError('必要ノードの配置先が選択rootの外です')
+            result.append(publish_archive(spec,target,cancelled,progress))
     managed=list(recipe()['managed_nodes'])
     if not (connection.root/'custom_nodes/ComfyUI-Unload-Model').exists():
         managed.append({'source':'mosaic_h3_memory.py','target':'custom_nodes/mosaic_h3_memory.py'})
@@ -488,7 +540,7 @@ def start_managed(connection,cancelled=lambda:False):
         p=subprocess.Popen([str(connection.python),*cfg['args']],cwd=connection.root,stdout=stream,stderr=subprocess.STDOUT,
                 env={**os.environ,'PYTHONUTF8':'1','PATH':(str(toolbin)+os.pathsep if toolbin else '')+os.environ.get('PATH','')},
                 creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-    from urllib.request import urlopen
+    from .runtime_http import urlopen
     for _ in range(120):
         if cancelled():raise KeyboardInterrupt
         if p.poll() is not None:raise SetupError('ComfyUIが起動できませんでした。ログ: '+str(log))
@@ -532,8 +584,12 @@ def _install_all(connection,new=False,accept_terms=False,acknowledge_warnings=Fa
             'root':str(connection.root),'profile':recipe()['profile'],'managed_new':new,'stages':{},'started_at':time.time()}
         if bool(state['managed_new'])!=new:raise SetupError('前回と導入方式が異なります。記録を確認してください')
         previous = state.get('main_lora')
-        if previous is not None and previous != proposed['lora_model'] and state.get('state') != 'dependencies_ready':
-            raise SetupError('前回の未完成導入と必須LoRAの固定版が異なります。記録を保全し、前回の選択で再開してください')
+        if (previous is not None and lora_profile_from_identity(previous)!=lora_profile_from_identity(proposed['lora_model'])
+                and state.get('state')!='dependencies_ready'):
+            old=lora_profile_from_identity(previous) or '固定版不明'
+            raise SetupError('前回の未完成導入と必須LoRAの固定版が異なります。前回の選択（'+old+'）で再開してください')
+        if state.get('state')=='dependencies_ready' and previous is not None:
+            state.setdefault('completed_main_lora',previous)
         state['main_lora'] = proposed['lora_model']
         atomic_json(path,{**state,'state':'installing'})
         def stage(name,action):
@@ -555,7 +611,7 @@ def _install_all(connection,new=False,accept_terms=False,acknowledge_warnings=Fa
             idle(connection)
             # Core changes are only for the newly owned environment.
             if new:stage('H3 VAEの互換設定',lambda:patch_core(connection))
-            stage('必要ノードを導入',lambda:install_nodes(connection,cancelled,progress))
+            stage('必要ノードを導入',lambda:install_nodes(connection,cancelled,progress,managed_new=new))
             if not new:stage('不足ライブラリを導入',lambda:prepare_libraries(connection,apply=True,cancelled=cancelled))
             stage('GPUとカーネルを検査',lambda:verify_gpu(connection,cancelled))
             stage('FFmpegを導入',lambda:install_tools(cancelled,progress))
@@ -563,12 +619,15 @@ def _install_all(connection,new=False,accept_terms=False,acknowledge_warnings=Fa
                 stage('起動設定を保存',lambda:write_launcher(connection,hw))
                 stage('ComfyUIを起動',lambda:start_managed(connection,cancelled))
             result=stage('必要ノードの登録を確認',lambda:inspect_nodes(connection))
+            if result.get('missing_runtime_files'):
+                raise SetupError('必要な本体・ノードファイルがありません。再起動だけでは解決しません。環境を保全して確認してください: '
+                                 +', '.join(result['missing_runtime_files']))
             if not result['nodes_verified']:
                 state.update(state='restart_required',next='選択した既存ComfyUIを通常の方法で再起動し、この導入操作をもう一度実行してください')
                 atomic_json(path,state);return state
             stage('不足モデルを取得',lambda:acquire_resources(connection,cancelled,progress,credentials=credentials,lora_profile=lora_profile,accept_terms=accept_terms))
             stage('環境の選択を保存',lambda:{'settings':str(save(connection))})
-            state.update(state='dependencies_ready',finished_at=time.time(),generation_tested=False,
+            state.update(state='dependencies_ready',completed_main_lora=proposed['lora_model'],finished_at=time.time(),generation_tested=False,
                          benchmark_resumed=False,hardware=hw)
             atomic_json(path,state)
             return state

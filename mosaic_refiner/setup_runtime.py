@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 import re
 from urllib.error import URLError
-from urllib.request import urlopen
+from .runtime_http import urlopen
 
 from .checkpoint import digest_file
 from .model_setup import SetupError, catalog, install, inspect

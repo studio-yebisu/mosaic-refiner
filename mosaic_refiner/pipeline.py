@@ -46,6 +46,12 @@ def run(
         raise ValueError("入力・最終出力はjobディレクトリの外へ置いてください")
     if stop_after_units is not None and stop_after_units < 1:
         raise ValueError("stop-after-unitsは1以上です")
+    if not output.exists():
+        output.parent.mkdir(parents=True,exist_ok=True)
+        _check_space(output.parent,0)
+        handle,name=tempfile.mkstemp(prefix='.mosaic-write-check-',dir=output.parent)
+        os.close(handle)
+        Path(name).unlink()
     info = source_info if source_info is not None else probe(source, allow_timeline=allow_timeline or processor is not None)
     end_frame = info.frame_count if end_frame is None else end_frame
     if not 0 <= first_frame < end_frame <= info.frame_count:
@@ -215,9 +221,10 @@ def run(
             if cancel_path.exists():
                 raise KeyboardInterrupt
             # Publish without replacing a user file created while encoding.
-            # Same-volume hard link is atomic and refuses an existing pathname.
+            # Windows rename and POSIX hard link refuse an existing pathname.
             try:
-                os.link(temporary_output, output)
+                if os.name=='nt':os.rename(temporary_output,output)
+                else:os.link(temporary_output, output)
             except FileExistsError as exc:
                 raise MediaError("処理中に出力先が作成されました。上書きせず停止しました") from exc
             manifest.update(state="complete", output=str(output), output_sha256=digest_file(output),

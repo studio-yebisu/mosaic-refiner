@@ -15,7 +15,7 @@
 
 アプリ用CPU環境とComfyUI用推論環境は別です。一つのComfyUIを選び、既存の共有環境・依存・他者のキュー・未完成作業を保全します。利用者が導入を依頼した範囲で付属セットアップを使い、起動だけで大容量取得や生成を始めません。本人認証・必須LoRA・hash照合を省いたり、未知の配布元・別モデルへ自動代用したりしません。
 
-新規ソフトウェアは付属resolverで最新の互換安定版を計画し、取得元・版・hashを記録します。モデルは[固定台帳](mosaic_refiner/model_catalog.json)と[必須LoRA](mosaic_refiner/h3_lora_profiles.py)を使い、ソフトウェアに合わせて別モデルへ自動更新しません。
+新規ComfyUIは公式の最新安定release、必要ノードは許可した配布元の現行commit、依存は互換性のある安定版を付属resolverで計画し、取得元・版・hashを記録します。モデルは[固定台帳](mosaic_refiner/model_catalog.json)と[必須LoRA](mosaic_refiner/h3_lora_profiles.py)を使い、ソフトウェアに合わせて別モデルへ自動更新しません。
 
 ## 変更・検証・報告
 
