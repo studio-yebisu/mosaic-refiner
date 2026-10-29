@@ -4,8 +4,8 @@ Windows向けローカル動画補正アプリを、AIによる導入補助を�
 
 対象領域の検出・追跡、手動指定、BasicVSR++とH3による補正、原本を上書きしない保存、進捗・取消し・再開を備えます。AI出力は推測です。元の時刻・音声・対象外画素を検査し、条件とhashを保存します。
 
-主LoRAはUnlocked V2 / DecensoreH3の一つ、取得には本人のCivitai API認証が必須です。`official-h3-ref2va-int4-required-lora-v1`はH3由来ベース4モデルと補助2モデルに主LoRA一つを加えます。schema 3でLoRAなし・強度0を拒否します。許諾確認待ちの取得・推論停止を維持します。
+主LoRAはUnlocked V2 / DecensoreH3の一つ、取得には本人のCivitai API認証が必須です。`official-h3-ref2va-int4-required-lora-v1`はH3由来ベース4モデルと補助2モデルに主LoRA一つを加えます。schema 3でLoRAなし・強度0を拒否します。本人認証と利用条件の確認後に固定版を取得し、ファイルの照合を通して補正を実行します。
 
 新規ソフトウェアは最新の互換安定版を解決して記録し、再開時は同じ記録を使います。モデルは固定版を使います。既存ComfyUI・他者のキュー・利用者のdirty変更を保全し、起動だけでダウンロードや生成を始めません。
 
-12GB VRAMと長尺動画への実用対応は目標です。今回のLoRA付き構成の実H3、画質、低VRAM、別PCの全量導入を確認済みとは表示しません。[実装状況](implementation-plan.md)と[利用条件](use-conditions.md)を確認してください。
+12GB VRAMと長尺動画への実用対応は目標です。短い合成動画での実H3完走と、実素材の画質、低VRAM、長尺、別PCの全量導入を分けて報告します。[実装状況](implementation-plan.md)と[利用条件](use-conditions.md)を確認してください。

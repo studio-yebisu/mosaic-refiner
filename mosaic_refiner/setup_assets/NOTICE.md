@@ -19,6 +19,6 @@
 
 GPU wheelは公式PyTorch CUDA 13.0 indexとPyPIから取得します。最新安定Torchと対応するtorchvision / torchaudio / Windows用Tritonをmetadataから選び、wheelとmetadataのhashを記録します。Torchは修正確認済みの下限2.14.1以上です。comfy-kitchen / comfy-aimdoは選択したComfyUIのrequirementsに従います。対応wheelや配布元情報を確認できなければ停止します。合成GPU検査の成功は、実H3完走・画質の証明とは区別します。
 
-ベース・補助資源はH3由来INT4 DiT / encoder、FP16 Video VAE、FP32 Audio VAEと、BasicVSR++ / RF-DETRです。ソフトウェアの最新版解決で別hashへ置換しません。2026-10-27にUnlocked / Decensoreの主LoRA一つを必須とする要求へ更新しましたが、条件の確認待ちでモデル導入・自動取得・実推論は停止中です。Eros・guided重み・学習済みupscalerは戻しません。[主LoRAの出典と残件](../../docs/required-lora.md)、[導入手順](../../docs/model-setup.md)、[利用条件](../../docs/use-conditions.md)を参照してください。
+ベース・補助資源はH3由来INT4 DiT / encoder、FP16 Video VAE、FP32 Audio VAEと、BasicVSR++ / RF-DETRです。ソフトウェアの最新版解決で別hashへ置換しません。Unlocked / Decensoreの主LoRA一つと本人のCivitai API認証を必須にし、固定ファイルを照合して導入・推論を実行します。Eros・guided重み・学習済みupscalerは戻しません。[主LoRAの出典と残件](../../docs/required-lora.md)、[導入手順](../../docs/model-setup.md)、[利用条件](../../docs/use-conditions.md)を参照してください。
 
 独自部分はルート[LICENSE](../../LICENSE)のAGPL-3.0-onlyです。H3と各モデルの条件は別に適用され、地域・AUP・商用・製品提供側の安全措置等の確認を、重み非同梱だけで済ませたとは扱いません。重みを含むinstallerや外部推論サービスは本候補の提供範囲に含みません。

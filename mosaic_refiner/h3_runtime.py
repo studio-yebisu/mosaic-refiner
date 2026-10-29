@@ -42,7 +42,7 @@ def api(path, data=None):
 
 
 def build_graph(bundle: Path, staged: str, prefix: str, prompt: str) -> dict:
-    """Prepare the required-LoRA graph; execution still requires license clearance."""
+    """Prepare the required-LoRA graph; runtime verifies the selected pinned files."""
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     if manifest["state"] != "complete":
         raise ValueError("未完成のH3入力bundleです")

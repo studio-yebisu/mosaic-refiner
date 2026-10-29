@@ -10,7 +10,7 @@ def model(profile='unlocked_v2'):
     selected = PROFILES[profile]
     return Model(selected['id'], '', '', selected['filename'], 'loras/' + selected['lora'],
                  selected['size_bytes'], selected['lora_sha256'],
-                 selected['creator'] + ' / Civitai作者表示 + H3条件（許諾確認待ち）',
+                 selected['creator'] + ' / Civitai作者の利用条件 + H3条件',
                  selected['terms_url'], selected['source_checked_at'], provider='civitai',
                  model_id=selected['model_id'], version_id=selected['version_id'], file_id=selected['file_id'])
 
@@ -26,7 +26,7 @@ def conditions_text(profile='unlocked_v2'):
         '作者の配布ページ・条件表示: ' + selected['terms_url'],
         '基盤条件: ' + H3_TERMS_URL,
         '照合したH3条件のSHA-256: ' + H3_TERMS_SHA256,
-        '確認待ち: ' + selected['clearance_issue'],
+        '利用前の確認事項: ' + selected['clearance_issue'],
         'Civitai上の配布・生成の契約と、取得後のローカル利用条件は別です。本人のAPI認証や確認チェックで許諾済みにはなりません。',
     ))
 

@@ -218,7 +218,7 @@ def _plan(connection, new=False, lora_profile='unlocked_v2'):
             'lora_model':{'id':selected.id, 'model_id':selected.model_id, 'version_id':selected.version_id,
                           'file_id':selected.file_id, 'sha256':selected.sha256, 'terms_url':selected.terms_url},
             'civitai_authentication_required':True,
-            'model_conditions_ready':False,
+            'model_terms_review_required':True,
             'core_update':False,'generation_or_benchmark':False,
             'download_licenses':[{'repo':s['repo'],'revision':s['revision']} for s in data['sources']],
             'driver_install':False}
@@ -351,10 +351,11 @@ def install_tools(cancelled=lambda:False,progress=lambda **kw:None):
 
 
 def validate_lora(connection,source=None,cancelled=lambda:False,lora_profile='unlocked_v2'):
-    from .h3_lora_profiles import selected_lora
+    from .lora_setup import model
     if source is not None:
-        raise SetupError('必須LoRAは本人のCivitai API認証で取得する仕様です。許諾未確認のローカルファイルで代用しません')
-    return selected_lora(lora_profile, verify=True)
+        raise SetupError('必須LoRAは本人のCivitai API認証で取得してください。手動ファイルの取り込みには対応していません')
+    # Validate the pinned selection before download; the file need not exist yet.
+    return model(lora_profile)
 
 
 def create_core(connection,state,cancelled,progress):

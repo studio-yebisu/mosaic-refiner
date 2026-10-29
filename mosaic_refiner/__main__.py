@@ -91,7 +91,7 @@ def build_parser():
     refine.add_argument("--crop-margin", type=int, choices=(0, 16, 32, 64))
     refine.add_argument("--sampling", choices=("light", "standard"), help="軽め12+6 / 標準20+10")
     refine.add_argument("--h3-lora", choices=("unlocked_v2", "restoration"), default="unlocked_v2",
-                        help="追加LoRA必須: Unlocked V2 / DecensoreH3（許諾確認待ちのため実行停止中）")
+                        help="追加LoRA必須: Unlocked V2 / DecensoreH3（取得には本人のCivitai API認証が必要）")
     refine.add_argument("--lora-strength", type=float, default=1.0, help="必須LoRAの強度。0より大きく2以下")
     plan = commands.add_parser("plan", help="CFRの入力フレームを保存単位へ割り当てる")
     plan.add_argument("--frames", type=int, required=True, help="元動画のフレーム数")

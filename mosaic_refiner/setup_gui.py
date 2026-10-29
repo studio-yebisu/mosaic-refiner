@@ -12,7 +12,7 @@ from .setup_runtime import resources, resource_status, inspect_nodes
 from .setup_environment import plan, install_all, discovered_servers, recipe, state_directory
 from .model_auth import AuthError, Credentials, WindowsVault, PROVIDERS, check as check_auth
 from .lora_setup import conditions_text, require_user_key
-from .h3_lora_profiles import H3_TERMS_URL, available_profiles
+from .h3_lora_profiles import H3_TERMS_URL
 
 
 class SetupWindow:
@@ -88,7 +88,7 @@ class SetupWindow:
         ttk.Button(models,text='選択モデルの配布元・条件を開く',command=self.terms).pack(anchor='w',pady=4)
         ttk.Button(models,text='必須LoRAの作者・固定版・条件の確認状況',command=self.lora_terms).pack(anchor='w')
         ttk.Button(models,text='ComfyUI・ノード・Python・FFmpeg等の条件一覧',command=self.code_terms).pack(anchor='w')
-        ttk.Label(body,text='技術検証デモです。出力はAIの推測です。Unlocked V2 / DecensoreH3の追加LoRAが必須です。許諾とH3条件との整合は確認待ちのため、モデル導入・推論は停止中です。新規ソフトウェアの導入計画は最新の互換安定版を解決します。',wraplength=940).pack(anchor='w',pady=7)
+        ttk.Label(body,text='出力はAIの推測です。Unlocked V2 / DecensoreH3の主LoRA一つと、本人のCivitai API認証が必須です。配布元の条件を確認して導入してください。新規ソフトウェアの導入計画は最新の互換安定版を解決します。',wraplength=940).pack(anchor='w',pady=7)
         self.accepted=tk.BooleanVar(value=False);self.warning_ack=tk.BooleanVar(value=False)
         for text,var in (('各コード・モデル・FFmpeg等の配布元の利用条件を確認しました',self.accepted),
                          ('表示された未検証のGPU / RAM条件を確認して続行します',self.warning_ack)):
@@ -210,8 +210,7 @@ class SetupWindow:
                 if kind=='plan':result=plan(connection,new,self.cancelled.is_set,progress,lora_profile=lora_profile)
                 elif kind=='install':result=install_all(connection,new,accepted,ack,None,self.cancelled.is_set,progress,
                                                        credentials=credentials,lora_profile=lora_profile)
-                else:result={'nodes':inspect_nodes(connection),'models':resource_status(connection,cancelled=self.cancelled.is_set,progress=progress,lora_profile=lora_profile),
-                             'model_conditions_ready':False}
+                else:result={'nodes':inspect_nodes(connection),'models':resource_status(connection,cancelled=self.cancelled.is_set,progress=progress,lora_profile=lora_profile)}
                 self.events.put(('done',(kind,result)))
             except KeyboardInterrupt:self.events.put(('error','中断しました。途中データを保持します。再開は「すべて導入 / 再開」から行ってください。'))
             except Exception as exc:self.events.put(('error',str(exc)))
@@ -250,16 +249,13 @@ class SetupWindow:
                            'LoRAの固定版: '+json.dumps(result['lora_model'],ensure_ascii=False),
                            '処理動画・既存出力は使いません。導入後も実動画の完走・画質は別の確認です。',
                            '今回の導入版（再開時は固定）: '+json.dumps(result.get('resolution',{}),ensure_ascii=False,indent=2)]
-                    self.show_report('\n\n'.join(lines));self.status.set('PC要件は満たしていますが、必須LoRAの許諾確認待ちで導入は停止中です。' if hw['can_install'] else '要件が不足しています。モデル取得を開始できません。')
+                    self.show_report('\n\n'.join(lines));self.status.set('PC要件を満たしています。配布元の利用条件を確認して導入を開始してください。' if hw['can_install'] else '要件が不足しています。モデル取得を開始できません。')
                 elif action=='install':
-                    if result['state']=='dependencies_ready' and not available_profiles()[self.selected_lora()]['execution_enabled']:
-                        self.status.set('依存の確認結果を受け取りました。必須LoRAの許諾確認待ちのため、モデル導入・推論は停止中です。')
-                    else:
-                        self.status.set('依存・モデル・GPUカーネル・ノード登録を確認しました。Web/Windowsアプリを起動し直してください。実動画の完走は未確認です。' if result['state']=='dependencies_ready' else result.get('next',result['state']))
+                    self.status.set('依存・モデル・GPUカーネル・ノード登録を確認しました。Web/Windowsアプリを起動し直してください。' if result['state']=='dependencies_ready' else result.get('next',result['state']))
                     self.show_report(json.dumps(result,ensure_ascii=False,indent=2))
                 else:
-                    ready=result.get('model_conditions_ready',False) and result['nodes']['nodes_verified'] and all(r['state']=='verified' for r in result['models'])
-                    self.status.set('ノードとモデルを確認しました。実H3・画質は別の確認です。' if ready else '必須LoRAの条件確認待ち、または不足・未確認の項目があります。')
+                    ready=result['nodes']['nodes_verified'] and all(r['state']=='verified' for r in result['models'])
+                    self.status.set('ノードとモデルを確認しました。動画を選んで補正を開始できます。' if ready else '不足またはhash未確認のノード・モデルがあります。表示内容を確認してください。')
                     self.show_report(json.dumps(result,ensure_ascii=False,indent=2))
         self.root.after(100,self.poll)
 

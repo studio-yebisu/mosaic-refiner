@@ -92,8 +92,6 @@ def resource_status(connection, verify=True, cancelled=lambda: False, progress=l
 
 def acquire_resources(connection, cancelled=lambda: False, progress=lambda **kw: None, credentials=None, lora_profile='unlocked_v2', accept_terms=False):
     if not accept_terms:raise SetupError('各配布元の利用条件を本人が確認してから取得してください')
-    from .h3_lora_profiles import selected_lora
-    selected_lora(lora_profile, verify=True)
     from .lora_setup import preflight_selection
     credentials = preflight_selection(lora_profile,credentials)
     connection.validate()
@@ -108,7 +106,7 @@ def acquire_resources(connection, cancelled=lambda: False, progress=lambda **kw:
 
 
 def import_unlocked(connection, source, cancelled=lambda:False):
-    raise SetupError('追加LoRAは必須ですが、許諾とH3条件との整合は確認待ちです。ファイル配置だけで確認済みにはしません')
+    raise SetupError('必須LoRAは本人のCivitai API認証で取得してください。手動ファイルの取り込みには対応していません')
 
 
 def run_python(python, args, cwd, cancelled=lambda:False):

@@ -90,7 +90,8 @@ def request(operation, data):
             from .learned_detection import setup
         else:
             from .restoration_models import setup
-        kwargs = {"lora_profile": data.get("lora_profile", "unlocked_v2")} if operation == "prepare-restoration" else {}
+        kwargs = {"lora_profile": data.get("lora_profile", "unlocked_v2"),
+                  "accept_terms": data.get("accept_terms") is True} if operation == "prepare-restoration" else {}
         setup(progress=lambda **event: emit("progress", event), **kwargs)
         return metadata()
     if operation == "cli":

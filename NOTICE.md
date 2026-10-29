@@ -10,7 +10,7 @@ Lada / OpenMMLab由来のBasicVSR++推論部品を含むため、アプリの独
 
 アプリの取得・改変・配布・商用利用はAGPLの条件に従って行えます。第三者モデル、外部ComfyUI、node、FFmpeg、Python、ライブラリの利用権はこの表示から付与しません。モデル・素材・実行環境のarchive・第三者wheel・構築済みbinaryは同梱しません。
 
-H3は外部モデルです。ベースには元H3条件を明示するコミュニティ量子化・repack版を使います。MiniMax本人の直配布ファイルという意味ではありません。Unlocked V2 / DecensoreH3の条件確認待ちでモデル導入・推論は停止中です。[LoRA候補と確認範囲](docs/required-lora.md)を参照してください。公式条件の照合用コピーを[licenses/MiniMax-H3-LICENSE.txt](licenses/MiniMax-H3-LICENSE.txt)に保持します。現行の配布元条件、対象地域・AUP・商用・製品提供の条件も確認してください。このコピーはアプリ全体のライセンスではありません。
+H3は外部モデルです。ベースには元H3条件を明示するコミュニティ量子化・repack版を使います。MiniMax本人の直配布ファイルという意味ではありません。Unlocked V2 / DecensoreH3の一つを必須とし、本人認証で取得した固定ファイルを照合して補正します。[LoRA候補と確認範囲](docs/required-lora.md)を参照してください。公式条件の照合用コピーを[licenses/MiniMax-H3-LICENSE.txt](licenses/MiniMax-H3-LICENSE.txt)に保持します。現行の配布元条件、対象地域・AUP・商用・製品提供の条件も確認してください。このコピーはアプリ全体のライセンスではありません。
 
 MiniMax H3 is licensed under the MiniMax H3 Community License Agreement, Copyright © 2026 MiniMax. All Rights Reserved.
 

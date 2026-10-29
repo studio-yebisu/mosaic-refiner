@@ -171,7 +171,7 @@ class Controller:
                 self.state = previous
         return self.snapshot()
 
-    def prepare_restoration(self):
+    def prepare_restoration(self, settings=None):
         from .restoration_models import setup
         with self.lock:
             if self.busy() or self.uploading:
@@ -180,7 +180,9 @@ class Controller:
             previous = dict(self.state)
             self.state = {"state":"setup","phase":"補正モデルを準備しています"}
         try:
-            setup(progress=self.progress)
+            settings = settings or {}
+            setup(progress=self.progress, lora_profile=settings.get('lora_profile', 'unlocked_v2'),
+                  accept_terms=settings.get('accept_terms') is True)
         finally:
             with self.lock:
                 self.uploading = False
@@ -390,7 +392,7 @@ class Handler(BaseHTTPRequestHandler):
                 elif path == "/api/prepare-detector":
                     result = self.server.controller.prepare_detector()
                 elif path == "/api/prepare-restoration":
-                    result = self.server.controller.prepare_restoration()
+                    result = self.server.controller.prepare_restoration(settings)
                 else:
                     raise ValueError("操作が見つかりません")
             self.json(result)

@@ -1,5 +1,6 @@
 """Pinned local H3 LoRA choices; no downloads or base-weight changes."""
 
+from .checkpoint import digest_file
 from .model_setup import SetupError
 from .restoration_models import (COMFY_ROOT, RESTORATION_LORA, RESTORATION_LORA_SHA,
                                  RESTORATION_LORA_SIZE)
@@ -40,12 +41,15 @@ def selected_lora(profile, verify=False):
     if verify:
         if profile == 'none':
             raise SetupError('追加LoRAは必須です。Unlocked V2またはDecensoreH3を選択してください')
-        # Selection is a product requirement, not evidence of a license grant.
-        raise SetupError('追加LoRAの許諾確認待ち: ' + result['clearance_issue'] + '。自動取得・推論は停止中です。docs/required-lora.mdを確認してください')
+        path = COMFY_ROOT / 'models/loras' / result['lora']
+        if (not path.is_file() or path.stat().st_size != result['size_bytes']
+                or digest_file(path) != result['lora_sha256']):
+            raise SetupError('選択したH3 LoRAが未導入またはhash不一致です: ' + result['label'] + '。本人のCivitai API認証で固定版を取得してください')
     return result
 
 
 def available_profiles():
-    return {name: {**PROFILES[name], 'available': False, 'required': True,
-                   'license_status': 'unresolved', 'execution_enabled': False}
+    return {name: {**PROFILES[name],
+                   'available': (COMFY_ROOT / 'models/loras' / PROFILES[name]['lora']).is_file(),
+                   'required': True, 'license_status': 'terms_apply', 'execution_enabled': True}
             for name in ('unlocked_v2', 'restoration')}

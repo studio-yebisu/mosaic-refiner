@@ -14,7 +14,7 @@ H3には[公式Community License / Exhibit A](https://huggingface.co/MiniMaxAI/M
 | H3 Video / Audio VAE | [Comfy-Orgの固定card](https://huggingface.co/Comfy-Org/MiniMax-H3/blob/e5eb578a89295337b8ff433a035929ce0279e0b6/README.md)。H3由来repackとして扱う |
 | BasicVSR++ | [Ladaの固定配布](https://huggingface.co/ladaapp/lada/tree/bcf461d46d9a98981fc64b815df5178f42215cdf)と[対応条件](https://github.com/ladaapp/lada/blob/20cb34a20a83c72c87a991d2c949032c70085b16/LICENSE.md) |
 | RF-DETR | [Jasna作者の条件](https://github.com/Kruk2/jasna/blob/79d9f11582c03accc16197896780241c54ba2823/LICENSING.md)。作者の専用detector条件として扱う |
-| 必須主LoRA | [作者・固定版・未解決範囲](required-lora.md)を参照。現在の導入・推論は停止 |
+| 必須主LoRA | [作者・固定版・利用条件](required-lora.md)を参照。本人のCivitai API認証と利用条件の明示確認を通して取得する |
 
 コミュニティ変換版をMiniMax本人の直配布とは表記しません。固定hashはファイルの同一性の検査であり、用途や地域の適合を証明しません。本人の認証や利用条件のチェックも作者承認とは別です。
 

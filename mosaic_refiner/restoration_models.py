@@ -1,11 +1,9 @@
 """Pinned restoration components, acquired only by an explicit setup operation."""
 import os
 from pathlib import Path
-import shutil
-import subprocess
 
 from .checkpoint import digest_file
-from .model_setup import Model, SetupError, default_cache, install
+from .model_setup import Model, SetupError
 
 from .runtime_settings import RUNTIME
 COMFY_ROOT = RUNTIME.root
@@ -51,9 +49,11 @@ def _verified(path, size, expected):
 
 def ready(lora_profile='unlocked_v2'):
     from .h3_lora_profiles import selected_lora
-    selected=selected_lora(lora_profile)
-    # Model presence alone does not resolve the pending LoRA conditions.
-    return False
+    try:
+        selected_lora(lora_profile, verify=True)
+        return _verified(basic_path(), BASIC.size_bytes, BASIC.sha256)
+    except (ValueError, OSError):
+        return False
 
 
 def identity(processing_options=None):
@@ -75,17 +75,10 @@ def identity(processing_options=None):
             'lora_enabled': options.lora_strength > 0, 'quality_adopted': False}
 
 
-def setup(cancelled=lambda: False, progress=lambda **kw: None, lora_profile='unlocked_v2'):
-    """Explicit setup; unresolved LoRA conditions stop before file or network writes."""
-    from .h3_lora_profiles import selected_lora
-    selected_lora(lora_profile, verify=True)
-    directory = model_directory()
-    if _verified(basic_path(), BASIC.size_bytes, BASIC.sha256):
-        target = BASIC.destination(directory)
-        if not target.exists():
-            target.parent.mkdir(parents=True, exist_ok=True)
-            with basic_path().open('rb') as source, target.open('xb') as output:
-                shutil.copyfileobj(source, output)
-    else:
-        install(directory, default_cache(), models=[BASIC], cancelled=cancelled, progress=progress)
+def setup(cancelled=lambda: False, progress=lambda **kw: None, lora_profile='unlocked_v2',
+          credentials=None, accept_terms=False):
+    """Use the same authenticated, pinned acquisition path as the full setup."""
+    from .setup_runtime import acquire_resources
+    acquire_resources(RUNTIME, cancelled, progress, credentials=credentials,
+                      lora_profile=lora_profile, accept_terms=accept_terms)
     return identity({'lora_profile': lora_profile})

@@ -412,7 +412,7 @@
           "unlocked_v2",
           "restoration"
         ],
-        "help": "追加LoRA必須: Unlocked V2 / DecensoreH3（許諾確認待ちのため実行停止中）"
+        "help": "追加LoRA必須: Unlocked V2 / DecensoreH3（取得には本人のCivitai API認証が必要）"
       },
       {
         "name": "lora_strength",

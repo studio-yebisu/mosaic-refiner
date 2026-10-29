@@ -1,6 +1,6 @@
 # 第三者コード・外部依存・モデル
 
-2026-10-27。提供対象はアプリのソースのみです。同梱するコードと、利用者の明示操作で別途取得するものを分けます。アプリのAGPL表示を、重みや外部プログラムの許諾へ読み替えません。H3由来ベースにUnlocked V2 / DecensoreH3のいずれかを加える要求へ更新しましたが、主LoRAの条件確認待ちで導入・推論は停止中です。[現行の確認範囲](docs/required-lora.md)を参照してください。
+2026-10-27。提供対象はアプリのソースのみです。同梱するコードと、利用者の明示操作で別途取得するものを分けます。アプリのAGPL表示を、重みや外部プログラムの許諾へ読み替えません。H3由来ベースにUnlocked V2 / DecensoreH3の一つを必須とし、本人のCivitai API認証で取得して使います。[現行の確認範囲](docs/required-lora.md)を参照してください。
 
 ## 同梱するコード
 
@@ -33,15 +33,15 @@ Rust hostのWindows用固定依存49件の名前・版・license・repositoryは
 
 モデル・LoRA・素材は同梱しません。公開用のH3はMerserkのINT4 DiT / encoder、Comfy-OrgのFP16 Video VAE / FP32 Audio VAEで、元H3条件を明示するコミュニティ量子化・repack版です。補助モデルはLada BasicVSR++とJasna RF-DETRです。固定URL・版・容量・hashは[H3台帳](mosaic_refiner/model_catalog.json)と補助モデルの実装が正本です。[モデル別条件](docs/use-conditions.md)を参照してください。
 
-H3の地域・AUP・商用・提供側の条件は量子化版にも適用されます。hash一致、重み非同梱、LoRAの有無を、用途の許可や提供側の安全措置等の確認に代えません。旧Eros / guided重み等は戻さず、Unlocked / Decensoreは必須候補へ戻しましたが、条件の確認待ちで取得・実行は停止中です。旧構成の記録は当時の条件として保持します。
+H3の地域・AUP・商用・提供側の条件は量子化版にも適用されます。hash一致、重み非同梱、LoRAの有無を、用途の許可や提供側の安全措置等の確認に代えません。現行profileでは旧Eros / guided重み等へ自動代用せず、必須主LoRAと固定モデルを照合して補正を実行します。
 
 必須主LoRA候補の著作者表示を以下に保持します。どちらの重みも同梱していません。この一覧は追加の利用許諾ではありません。
 
 | 主LoRA候補 | 著作者・固定配布ページ | 適用条件の確認状況 |
 | --- | --- | --- |
-| MiniMax H3 Unlocked V2 | [The_Midnight_Lab](https://civitai.com/user/The_Midnight_Lab) / [model 2925727・version 3354822](https://civitai.com/models/2925727?modelVersionId=3354822) | 作者はcreditを要求。作者表示とH3条件を合わせた許可範囲は確認待ち |
-| DecensoreH3 | [herpderpmerp](https://civitai.com/user/herpderpmerp) / [model 2990026・version 3390424](https://civitai.com/models/2990026?modelVersionId=3390424) | 作者はcreditを要求。ローカル動画用途の条件本文等は確認待ち |
+| MiniMax H3 Unlocked V2 | [The_Midnight_Lab](https://civitai.com/user/The_Midnight_Lab) / [model 2925727・version 3354822](https://civitai.com/models/2925727?modelVersionId=3354822) | 作者はcreditを要求。作者とH3の条件を確認して使用 |
+| DecensoreH3 | [herpderpmerp](https://civitai.com/user/herpderpmerp) / [model 2990026・version 3390424](https://civitai.com/models/2990026?modelVersionId=3390424) | 作者はcreditを要求。動画の加工・出力利用の条件を確認して使用 |
 
-Civitai上のH3配布等の契約と取得後の自前実行は区別します。`allowDerivatives`の表示はマージ共有の意味です。SD用の個別条件生成器をH3へ転用せず、作者の許可本文を創作しません。[主LoRAの条件](docs/required-lora.md)に確認待ち事項を記載しています。
+Civitai上のH3配布等の契約と取得後の自前実行は区別します。`allowDerivatives`の表示はマージ共有の意味です。SD用の個別条件生成器をH3へ転用せず、作者の許可本文を創作しません。[主LoRAの条件](docs/required-lora.md)に適用する条件を記載しています。
 
 改変箇所の表示、著作権表示と本文の保持、AGPL対象の対応source提供等を、実際に含める部品の条件に従って行ってください。元Gitへのリンクだけで全形式の再配布条件を満たすと断定しません。本候補はソースで、重みや外部環境を含む完成版installerではありません。
