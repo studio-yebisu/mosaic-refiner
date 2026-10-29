@@ -1,0 +1,12 @@
+include README.md LICENSE NOTICE.md THIRD_PARTY_NOTICES.md CONTRIBUTING.md AGENTS.md
+include .gitignore .gitattributes *.cmd *.ps1
+recursive-include docs *.md *.json
+recursive-include native *.toml *.lock *.rs *.json
+recursive-include scripts *.py
+recursive-include mosaic_refiner/setup_assets *.py *.json *.md
+recursive-include mosaic_refiner/vendor *.py *.md *.txt
+prune native/target
+prune native/host/target
+prune mosaic_refiner/_native
+prune work
+global-exclude __pycache__ *.py[cod] *.exe *.dll *.safetensors *.ckpt *.pth *.pt *.onnx *.gguf

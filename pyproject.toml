@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-refiner"
+version = "0.1.0"
+description = "Experimental local video novelty tool with a Rust host and Python AI workers"
+readme = "README.md"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE", "NOTICE.md", "THIRD_PARTY_NOTICES.md", "licenses/*.txt"]
+requires-python = ">=3.11,<3.14"
+authors = [{name = "Studio Yebisu and mosaic-refiner contributors"}]
+dependencies = ["numpy>=1.26", "av>=14", "psutil>=6", "websocket-client>=1.8", "packaging>=25", "opencv-python-headless>=4.12,<5", "onnxruntime-directml>=1.24,<2; sys_platform == 'win32'", "onnxruntime>=1.22,<2; sys_platform != 'win32'"]
+
+[project.urls]
+Repository = "https://github.com/studio-yebisu/mosaic-refiner"
+Issues = "https://github.com/studio-yebisu/mosaic-refiner/issues"
+
+[project.scripts]
+mosaic-refiner = "mosaic_refiner.__main__:main"
+
+[project.gui-scripts]
+mosaic-refiner-gui = "mosaic_refiner.gui:main"
+
+[tool.setuptools.packages.find]
+include = ["mosaic_refiner*"]
+
+[tool.setuptools.package-data]
+mosaic_refiner = ["model_catalog.json", "web.html"]
+"mosaic_refiner.setup_assets" = ["recipe.json", "NOTICE.md"]
+"mosaic_refiner.vendor.lada_basicvsr" = ["NOTICE.md", "AGPL-3.0.md", "Apache-2.0.txt"]

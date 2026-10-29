@@ -1,0 +1,975 @@
+[
+  {
+    "name": "gui",
+    "arguments": []
+  },
+  {
+    "name": "web",
+    "arguments": [
+      {
+        "name": "port",
+        "flags": [
+          "--port"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      }
+    ]
+  },
+  {
+    "name": "setup-gui",
+    "arguments": []
+  },
+  {
+    "name": "setup-runtime",
+    "arguments": [
+      {
+        "name": "action",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "configure",
+          "check",
+          "models-download",
+          "node-install",
+          "libraries-plan",
+          "libraries-install",
+          "import-unlocked",
+          "plan",
+          "install",
+          "start-managed"
+        ],
+        "help": ""
+      },
+      {
+        "name": "root",
+        "flags": [
+          "--root"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "既存ComfyUIのmain.pyがあるroot"
+      },
+      {
+        "name": "python",
+        "flags": [
+          "--python"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "このComfyUIを起動するPython"
+      },
+      {
+        "name": "endpoint",
+        "flags": [
+          "--endpoint"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "new",
+        "flags": [
+          "--new"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": "空のrootへ新規導入（既存ComfyUI使用中は拒否）"
+      },
+      {
+        "name": "acknowledge_warnings",
+        "flags": [
+          "--acknowledge-warnings"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": "12〜23GB VRAM等の未検証条件を確認済み"
+      },
+      {
+        "name": "accept_model_terms",
+        "flags": [
+          "--accept-model-terms"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "lora_file",
+        "flags": [
+          "--lora-file"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "lora_profile",
+        "flags": [
+          "--lora-profile"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "unlocked_v2",
+          "restoration"
+        ],
+        "help": "必須LoRAを選択。取得には本人のCivitai API認証が必要"
+      }
+    ]
+  },
+  {
+    "name": "models",
+    "arguments": [
+      {
+        "name": "action",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "check",
+          "download"
+        ],
+        "help": ""
+      },
+      {
+        "name": "models_dir",
+        "flags": [
+          "--models-dir"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "cache_dir",
+        "flags": [
+          "--cache-dir"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "verify",
+        "flags": [
+          "--verify"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": "既存モデルの全bytes hashを検査"
+      },
+      {
+        "name": "accept_model_terms",
+        "flags": [
+          "--accept-model-terms"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": "台帳の配布元利用条件を確認済み"
+      },
+      {
+        "name": "catalog",
+        "flags": [
+          "--catalog"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "本人が条件を確認した固定版JSON台帳（Hugging Face / Civitai）"
+      }
+    ]
+  },
+  {
+    "name": "auth",
+    "arguments": [
+      {
+        "name": "action",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "login",
+          "check",
+          "forget"
+        ],
+        "help": ""
+      },
+      {
+        "name": "provider",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "huggingface",
+          "civitai"
+        ],
+        "help": ""
+      },
+      {
+        "name": "save",
+        "flags": [
+          "--save"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": "Windows資格情報マネージャーへ保存"
+      }
+    ]
+  },
+  {
+    "name": "refine",
+    "arguments": [
+      {
+        "name": "input",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "output",
+        "flags": [
+          "--output"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "job_dir",
+        "flags": [
+          "--job-dir"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "roi",
+        "flags": [
+          "--roi"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "context_seconds",
+        "flags": [
+          "--context-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          5,
+          10,
+          15
+        ],
+        "help": ""
+      },
+      {
+        "name": "unit_seconds",
+        "flags": [
+          "--unit-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "mode",
+        "flags": [
+          "--mode"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "speed",
+          "balanced",
+          "detail"
+        ],
+        "help": "速度優先 / 標準 / 精細さ優先（画質は未評価）"
+      },
+      {
+        "name": "render_scale",
+        "flags": [
+          "--render-scale"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          50,
+          75,
+          100,
+          125
+        ],
+        "help": ""
+      },
+      {
+        "name": "pixel_budget",
+        "flags": [
+          "--pixel-budget"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          65536,
+          147456,
+          262144,
+          589824
+        ],
+        "help": ""
+      },
+      {
+        "name": "crop_margin",
+        "flags": [
+          "--crop-margin"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          0,
+          16,
+          32,
+          64
+        ],
+        "help": ""
+      },
+      {
+        "name": "sampling",
+        "flags": [
+          "--sampling"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "light",
+          "standard"
+        ],
+        "help": "軽め12+6 / 標準20+10"
+      },
+      {
+        "name": "h3_lora",
+        "flags": [
+          "--h3-lora"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "unlocked_v2",
+          "restoration"
+        ],
+        "help": "追加LoRA必須: Unlocked V2 / DecensoreH3（許諾確認待ちのため実行停止中）"
+      },
+      {
+        "name": "lora_strength",
+        "flags": [
+          "--lora-strength"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "必須LoRAの強度。0より大きく2以下"
+      }
+    ]
+  },
+  {
+    "name": "plan",
+    "arguments": [
+      {
+        "name": "frames",
+        "flags": [
+          "--frames"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "元動画のフレーム数"
+      },
+      {
+        "name": "fps",
+        "flags": [
+          "--fps"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "元FPS。30000/1001等も指定可"
+      },
+      {
+        "name": "unit_seconds",
+        "flags": [
+          "--unit-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "context_seconds",
+        "flags": [
+          "--context-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          5,
+          10,
+          15
+        ],
+        "help": ""
+      },
+      {
+        "name": "with_windows",
+        "flags": [
+          "--with-windows"
+        ],
+        "required": false,
+        "boolean": true,
+        "append": false,
+        "choices": null,
+        "help": "未検証H3候補窓とpadding計画も表示"
+      },
+      {
+        "name": "overlap_seconds",
+        "flags": [
+          "--overlap-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "scene_cut_frame",
+        "flags": [
+          "--scene-cut-frame"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": true,
+        "choices": null,
+        "help": ""
+      }
+    ]
+  },
+  {
+    "name": "probe",
+    "arguments": [
+      {
+        "name": "input",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      }
+    ]
+  },
+  {
+    "name": "run",
+    "arguments": [
+      {
+        "name": "input",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "output",
+        "flags": [
+          "--output"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ".nutまたはlossless RGBの.mp4。既存ファイルを上書きしません"
+      },
+      {
+        "name": "job_dir",
+        "flags": [
+          "--job-dir"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "checkpoint保存先。同じ引数で再実行すると再開"
+      },
+      {
+        "name": "roi",
+        "flags": [
+          "--roi"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "backend",
+        "flags": [
+          "--backend"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          "identity",
+          "invert"
+        ],
+        "help": ""
+      },
+      {
+        "name": "feather",
+        "flags": [
+          "--feather"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "first_frame",
+        "flags": [
+          "--first-frame"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "end_frame",
+        "flags": [
+          "--end-frame"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "対象区間の末尾（このframeを含まない）"
+      },
+      {
+        "name": "unit_seconds",
+        "flags": [
+          "--unit-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "context_seconds",
+        "flags": [
+          "--context-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          5,
+          10,
+          15
+        ],
+        "help": "将来H3用。CPU処理には適用せず、設定hashに保存"
+      },
+      {
+        "name": "stop_after_units",
+        "flags": [
+          "--stop-after-units"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "指定数の新規chunk確定後に安全停止（再開試験用）"
+      }
+    ]
+  },
+  {
+    "name": "status",
+    "arguments": [
+      {
+        "name": "job_dir",
+        "flags": [
+          "--job-dir"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      }
+    ]
+  },
+  {
+    "name": "cancel",
+    "arguments": [
+      {
+        "name": "job_dir",
+        "flags": [
+          "--job-dir"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      }
+    ]
+  },
+  {
+    "name": "h3-plan",
+    "arguments": [
+      {
+        "name": "input",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "roi",
+        "flags": [
+          "--roi"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "context_seconds",
+        "flags": [
+          "--context-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          5,
+          10,
+          15
+        ],
+        "help": ""
+      },
+      {
+        "name": "unit_seconds",
+        "flags": [
+          "--unit-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "overlap_seconds",
+        "flags": [
+          "--overlap-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "scene_cut_frame",
+        "flags": [
+          "--scene-cut-frame"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": true,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "max_pixels",
+        "flags": [
+          "--max-pixels"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "seed",
+        "flags": [
+          "--seed"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "prompt_file",
+        "flags": [
+          "--prompt-file"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "crop_margin",
+        "flags": [
+          "--crop-margin"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "書戻しROI外に含める参照用余白pixel"
+      },
+      {
+        "name": "feather",
+        "flags": [
+          "--feather"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "書戻しROI内側のfeather pixel"
+      }
+    ]
+  },
+  {
+    "name": "h3-prepare",
+    "arguments": [
+      {
+        "name": "input",
+        "flags": [],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "roi",
+        "flags": [
+          "--roi"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "context_seconds",
+        "flags": [
+          "--context-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": [
+          5,
+          10,
+          15
+        ],
+        "help": ""
+      },
+      {
+        "name": "unit_seconds",
+        "flags": [
+          "--unit-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "overlap_seconds",
+        "flags": [
+          "--overlap-seconds"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "scene_cut_frame",
+        "flags": [
+          "--scene-cut-frame"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": true,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "max_pixels",
+        "flags": [
+          "--max-pixels"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "seed",
+        "flags": [
+          "--seed"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "prompt_file",
+        "flags": [
+          "--prompt-file"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": ""
+      },
+      {
+        "name": "crop_margin",
+        "flags": [
+          "--crop-margin"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "書戻しROI外に含める参照用余白pixel"
+      },
+      {
+        "name": "feather",
+        "flags": [
+          "--feather"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "書戻しROI内側のfeather pixel"
+      },
+      {
+        "name": "output_dir",
+        "flags": [
+          "--output-dir"
+        ],
+        "required": true,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "新しいbundle保存先。既存directoryは拒否"
+      },
+      {
+        "name": "window_index",
+        "flags": [
+          "--window-index"
+        ],
+        "required": false,
+        "boolean": false,
+        "append": false,
+        "choices": null,
+        "help": "h3-planで確認した窓番号。既定0"
+      }
+    ]
+  },
+  {
+    "name": "h3-check",
+    "arguments": []
+  }
+]

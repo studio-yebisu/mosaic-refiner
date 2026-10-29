@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "profile": "official-h3-ref2va-int4-required-lora-v1",
+  "models": [
+    {
+      "id": "official-ref2va-int4",
+      "repo": "Merserk/MiniMax-H3-INT4-ConvRot",
+      "revision": "3c167bc916cab6cf3b85b9e3769952757ebb2e5d",
+      "filename": "minimax_h3_ref2va_pruned_int4_convrot.safetensors",
+      "target": "diffusion_models/mosaic_refiner_official/minimax_h3_ref2va_pruned_int4_convrot.safetensors",
+      "size_bytes": 11337536776,
+      "sha256": "71b667abcdc16f11920b1a5aaa9e14521f0ac432377f1ee968ea0c500652fdc3",
+      "license_label": "MiniMax H3 Community License (community INT4 conversion)",
+      "terms_url": "https://huggingface.co/Merserk/MiniMax-H3-INT4-ConvRot/blob/3c167bc916cab6cf3b85b9e3769952757ebb2e5d/README.md",
+      "source_checked_at": "2026-10-26"
+    },
+    {
+      "id": "encoder",
+      "repo": "Merserk/MiniMax-H3-INT4-ConvRot",
+      "revision": "3c167bc916cab6cf3b85b9e3769952757ebb2e5d",
+      "filename": "qwen3vl_32b_minimax_h3_int4_convrot.safetensors",
+      "target": "text_encoders/qwen3vl_32b_minimax_h3_int4_convrot.safetensors",
+      "size_bytes": 14952506624,
+      "sha256": "4389571ab5db4180bcae33d13d07855319530f60a85ab0f1061379401a8ef66c",
+      "license_label": "minimax-h3-community-license",
+      "terms_url": "https://huggingface.co/Merserk/MiniMax-H3-INT4-ConvRot/blob/3c167bc916cab6cf3b85b9e3769952757ebb2e5d/README.md",
+      "source_checked_at": "2026-10-26"
+    },
+    {
+      "id": "official-video-vae",
+      "repo": "Comfy-Org/MiniMax-H3",
+      "revision": "e5eb578a89295337b8ff433a035929ce0279e0b6",
+      "filename": "vae/minimax_h3_video_vae_fp16.safetensors",
+      "target": "vae/mosaic_refiner_official/minimax_h3_video_vae_fp16.safetensors",
+      "size_bytes": 5207808496,
+      "sha256": "7c1f131492e7eddacaac9069a61b81bdd39de5cc96561e677c5eab1cdce5e522",
+      "license_label": "MiniMax H3 Community License (FP16 repack)",
+      "terms_url": "https://huggingface.co/Comfy-Org/MiniMax-H3/blob/e5eb578a89295337b8ff433a035929ce0279e0b6/README.md",
+      "source_checked_at": "2026-10-26"
+    },
+    {
+      "id": "audio-vae",
+      "repo": "Comfy-Org/MiniMax-H3",
+      "revision": "e5eb578a89295337b8ff433a035929ce0279e0b6",
+      "filename": "vae/minimax_h3_audio_vae_fp32.safetensors",
+      "target": "vae/minimax_h3_audio_vae_fp32.safetensors",
+      "size_bytes": 605254808,
+      "sha256": "8e505d95dd1561d47abd43d4238fd40d9bb1ae9e147ed0a4cba778d76ae4db48",
+      "license_label": "minimax-h3-community-license-agreement",
+      "terms_url": "https://huggingface.co/Comfy-Org/MiniMax-H3/blob/e5eb578a89295337b8ff433a035929ce0279e0b6/README.md",
+      "source_checked_at": "2026-10-26"
+    }
+  ]
+}

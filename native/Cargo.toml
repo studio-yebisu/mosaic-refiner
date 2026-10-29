@@ -1,0 +1,18 @@
+[package]
+name = "mosaic_refiner_core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.77"
+license = "AGPL-3.0-only"
+repository = "https://github.com/studio-yebisu/mosaic-refiner"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"

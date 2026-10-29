@@ -1,0 +1,13 @@
+* text=auto
+*.py text eol=lf
+*.rs text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.ps1 text eol=lf
+*.cmd text eol=crlf
+/LICENSE text eol=lf
+/licenses/GPL-3.0.txt text eol=lf
+# The model agreement is an unmodified upstream copy, including its spaces.
+/licenses/MiniMax-H3-LICENSE.txt -text whitespace=-blank-at-eol

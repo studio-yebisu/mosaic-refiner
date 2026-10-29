@@ -1,0 +1,30 @@
+[package]
+name = "mosaic-refiner"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "AGPL-3.0-only"
+repository = "https://github.com/studio-yebisu/mosaic-refiner"
+publish = false
+
+[lib]
+name = "mosaic_refiner_host"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+clap = { version = "4.6", features = ["string"] }
+serde_json = { version = "1.0", features = ["float_roundtrip", "arbitrary_precision"] }
+tiny_http = "0.12"
+uuid = { version = "1.23", features = ["v4"] }
+sha2 = "0.10"
+fs2 = "0.4"
+tempfile = "3.27"
+ctrlc = "3.5"
+percent-encoding = "2.3"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mosaic Refiner</title>
+<style>
+:root{color-scheme:light;
+--page:#f3efe8;--surface:#fbf9f5;--surface-2:#f2ede5;--surface-3:#e7e0d5;--field:#fff;
+--line:#ddd5c9;--line-strong:#b5aa9a;
+--text:#231f1a;--text-2:#564e44;--text-3:#6b6257;--placeholder:#776d61;
+--accent:#a3461e;--accent-hover:#8c3b18;--accent-soft:#f7e8dc;--accent-line:#d9a283;
+--ok:#2f6b46;--warn:#9a5b00;
+--ink:#1d1915;--ink-2:#28231e;--ink-3:#342e28;--ink-line:#463e36;--ink-text:#f4efe8;--ink-muted:#c4b9ab;--ink-dim:#8f8478;--ink-accent:#f0a273;--ink-accent-hover:#f5b68f;--ink-ok:#7fcf9b;--ink-err:#f08a7a;
+font-family:"Segoe UI Variable Text","Segoe UI","Yu Gothic UI","Meiryo UI",system-ui,sans-serif;font-size:15px;line-height:1.6;background:var(--page);color:var(--text);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--page)}
+::selection{background:#f0d3bf;color:var(--text)}
+[hidden]{display:none!important}
+main{max-width:1280px;margin:0 auto;padding:28px 32px 40px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ヘッダー */
+.app-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:20px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.mark{flex:none;width:28px;height:28px;border-radius:7px;background:conic-gradient(var(--accent) 0 25%,#dcb89e 0 50%,var(--accent) 0 75%,#ecdccd 0)}
+h1{margin:0;font-size:1.6rem;line-height:1.25;font-weight:650;letter-spacing:-.01em}
+.lead{margin:3px 0 0;color:var(--text-2);font-size:.93rem}
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text-2);background:var(--surface);border:1px solid var(--line);padding:5px 12px;border-radius:999px;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+
+/* レイアウト */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,380px);gap:24px;align-items:start}
+.col{display:grid;gap:20px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 0 rgba(60,40,20,.04)}
+.step{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-size:1.02rem;line-height:1.4;font-weight:650}
+.step-no{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:6px;background:var(--surface-3);color:var(--text-2);font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums}
+.block-title,legend{display:block;padding:0;margin:0 0 10px;font-size:.82rem;font-weight:700;color:var(--text-2)}
+h3.block-title{line-height:1.4}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--text-2)}
+.note{margin:8px 0 0;font-size:.85rem;line-height:1.7;color:var(--text-3)}
+
+/* 入力部品 */
+input[type=text],input[type=number],select{font:inherit;font-size:.93rem;color:var(--text);background-color:var(--field);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;min-height:40px;transition:border-color .15s,background-color .15s}
+input[type=number]{width:100%;font-variant-numeric:tabular-nums}
+input::placeholder{color:var(--placeholder);opacity:1}
+input[type=text]:hover:not(:disabled),input[type=number]:hover:not(:disabled),select:hover:not(:disabled){border-color:var(--text-3)}
+select{appearance:none;-webkit-appearance:none;width:100%;padding-right:34px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--text-2) 50%),linear-gradient(135deg,var(--text-2) 50%,transparent 50%);background-position:calc(100% - 17px) 52%,calc(100% - 12px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+input:disabled,select:disabled{background-color:var(--surface-2);color:var(--text-3);border-color:var(--line);cursor:not-allowed}
+button,.download{font:inherit;font-size:.9rem;font-weight:600;line-height:1.3;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 16px;border-radius:8px;border:1px solid var(--line-strong);background:var(--field);color:var(--text);cursor:pointer;text-decoration:none;text-align:center;transition:background-color .15s,border-color .15s,color .15s}
+button:hover:not(:disabled){background:var(--surface-2);border-color:var(--text-3)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{cursor:not-allowed;background:var(--surface-2);color:var(--text-3);border-color:var(--line)}
+
+/* 1 動画 */
+.drop{display:grid;justify-items:center;gap:6px;text-align:center;padding:30px 20px;border:1.5px dashed var(--line-strong);border-radius:12px;background:var(--surface-2);cursor:pointer;transition:border-color .15s,background-color .15s}
+.drop:hover{border-color:var(--accent-line);background:#f6efe6}
+.drop:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.drop.over{border-style:solid;border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.drop strong{display:block;font-size:1.1rem;font-weight:650}
+.drop .muted{font-size:.88rem}
+.drop-glyph{position:relative;width:40px;height:40px;margin-bottom:4px;border-radius:50%;background:var(--field);border:1px solid var(--line)}
+.drop-glyph::before,.drop-glyph::after{content:"";position:absolute;left:50%;top:50%;background:var(--accent);border-radius:1px;transform:translate(-50%,-50%)}
+.drop-glyph::before{width:14px;height:2px}
+.drop-glyph::after{width:2px;height:14px}
+main:has(#localPath:disabled) .drop{cursor:not-allowed;border-style:dashed;border-color:var(--line);background:var(--surface-2);box-shadow:none}
+main:has(#localPath:disabled) .drop .drop-glyph::before,main:has(#localPath:disabled) .drop .drop-glyph::after{background:var(--text-3)}
+main:has(#localPath:disabled) .drop::after{content:"処理が終わってから選択できます";font-size:.8rem;font-weight:600;color:var(--text-2);margin-top:2px}
+.path{margin-top:16px}
+.field-label{display:block;font-size:.82rem;font-weight:600;color:var(--text-2);margin-bottom:6px}
+.path .row{flex-wrap:nowrap}
+#localPath{flex:1;min-width:0}
+.upload{margin:12px 0 0;font-size:.88rem}
+.upload:empty{margin:0}
+.meta{display:flex;align-items:center;gap:10px;margin:14px 0 0;padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-weight:600;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.meta::before{content:"";flex:none;width:18px;height:14px;border:1.5px solid var(--accent);border-radius:3px;box-shadow:inset 0 3px 0 -1.5px var(--accent)}
+
+/* 2 設定 */
+.settings-empty{margin:0;padding:14px 16px;border:1px dashed var(--line);border-radius:10px;color:var(--text-3);font-size:.9rem}
+#settings:not([hidden])+.settings-empty{display:none}
+.block{padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.roi-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.roi-chip{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:.85rem;font-weight:600;color:var(--text);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.roi-chip::before{content:"";flex:none;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.preview{position:relative;width:fit-content;max-width:100%;margin:14px auto 0;background:var(--ink);border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px var(--line-strong)}
+.preview img{display:block;max-width:100%;max-height:min(62vh,540px);user-select:none;pointer-events:none}
+.preview canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+main:has(#localPath:disabled) .preview canvas{cursor:not-allowed}
+.roi-hint{text-align:center}
+#preview[hidden]+.roi-hint{display:none}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mode{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:10px;row-gap:4px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--field);cursor:pointer;transition:border-color .15s,background-color .15s}
+.mode:hover{border-color:var(--line-strong)}
+.mode input{appearance:none;-webkit-appearance:none;width:16px;height:16px;margin:0;border:1.5px solid var(--line-strong);border-radius:50%;background:var(--field);cursor:inherit}
+.mode input:checked{border-color:var(--accent);background:var(--accent);box-shadow:inset 0 0 0 3px var(--field)}
+.mode input:focus-visible{outline:none}
+.mode strong{font-weight:650}
+.mode span{grid-column:2;font-size:.82rem;line-height:1.55;color:var(--text-2)}
+.mode:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.mode:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.mode:has(input:disabled){cursor:not-allowed;background:var(--surface-2);border-color:var(--line);box-shadow:none}
+.mode:has(input:disabled:checked){border-color:var(--accent-line);box-shadow:inset 0 0 0 1px var(--accent-line)}
+.mode:has(input:disabled) input:checked{border-color:var(--text-3);background:var(--text-3);box-shadow:inset 0 0 0 3px var(--surface-2)}
+#modeHint{margin:10px 0 0;font-size:.85rem;color:var(--text-2);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.advanced-wrap{margin-top:18px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+.advanced-wrap summary{list-style:none;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;font-weight:600;cursor:pointer}
+.advanced-wrap summary::-webkit-details-marker{display:none}
+.advanced-wrap summary::before{content:"";flex:none;width:7px;height:7px;margin-left:2px;border-right:2px solid var(--text-2);border-bottom:2px solid var(--text-2);transform:rotate(-45deg);transition:transform .15s}
+.advanced-wrap summary:hover{background:var(--surface-2)}
+.advanced-wrap[open] summary{border-bottom:1px solid var(--line);border-radius:10px 10px 0 0}
+.advanced-wrap[open] summary::before{transform:rotate(45deg)}
+.adv-body{display:grid;gap:20px;padding:16px}
+.adv-group+.adv-group{padding-top:18px;border-top:1px solid var(--line)}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.field{display:grid;gap:6px;align-content:start;font-size:.85rem;font-weight:600;color:var(--text-2)}
+.check{display:inline-flex;align-items:center;gap:10px;margin-top:12px;font-size:.9rem;cursor:pointer}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:inherit}
+.check:has(input:disabled){cursor:not-allowed;color:var(--text-3)}
+
+/* 3 モデル */
+.models{display:grid;gap:10px}
+.model-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+.model-status{display:inline-flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text);overflow-wrap:anywhere}
+.model-status::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.model-row:has(button[hidden]) .model-status::before{background:var(--ok)}
+.model-status:empty::before{background:var(--line-strong)}
+.model-status:empty::after{content:"—";color:var(--text-3)}
+.btn-setup:not(:disabled){border-color:var(--accent-line);color:var(--accent)}
+.btn-setup:hover:not(:disabled){background:var(--accent-soft);border-color:var(--accent)}
+
+/* 4 処理と保存（dark） */
+.status{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow:auto;background:var(--ink);color:var(--ink-text);border:1px solid var(--ink);border-radius:14px;padding:22px;box-shadow:0 12px 32px -20px rgba(40,24,10,.55)}
+.status.running{box-shadow:inset 0 3px 0 var(--ink-accent),0 12px 32px -20px rgba(40,24,10,.55)}
+.status :focus-visible{outline-color:var(--ink-accent)}
+.status-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.status-head .step{margin:0}
+.status .step-no{background:var(--ink-3);color:var(--ink-text)}
+.state{display:none;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:var(--ink-muted);white-space:nowrap}
+.state::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ink-dim)}
+.status.running .state,.status:has(#output:not([hidden])) .state,.status:has(#error:not(:empty)) .state{display:inline-flex}
+.status.running .state::before{background:var(--ink-accent);animation:pulse 1.6s ease-in-out infinite}
+.status.running .state::after{content:"処理中"}
+.status:has(#output:not([hidden])) .state::before{background:var(--ink-ok);animation:none}
+.status:has(#output:not([hidden])) .state::after{content:"完了"}
+.status:has(#error:not(:empty)) .state::before{background:var(--ink-err);animation:none}
+.status:has(#error:not(:empty)) .state::after{content:"エラー"}
+@keyframes pulse{50%{opacity:.35}}
+#phase{min-height:1.45em;font-size:1.2rem;line-height:1.45;font-weight:650;color:#fff;white-space:pre-wrap;overflow-wrap:anywhere}
+.progress{height:8px;margin:16px 0 12px;background:var(--ink-3);border-radius:999px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--ink-accent);border-radius:inherit;transition:width .3s ease}
+.running i.indeterminate{width:25%!important;animation:slide 1.5s ease-in-out infinite}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:translateX(400%)}}
+.status:has(#output:not([hidden])) .progress i{background:var(--ink-ok)}
+#detail{margin:0 0 18px;font-size:.85rem;line-height:1.7;color:var(--ink-muted);white-space:pre-line;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#detail:empty{margin-bottom:6px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.status button,.status .download{background:var(--ink-2);border-color:var(--ink-line);color:var(--ink-text)}
+.status button:hover:not(:disabled){background:var(--ink-3);border-color:#5d544a}
+.status button:disabled{background:transparent;border-color:var(--ink-3);color:var(--ink-dim)}
+.status button.primary{grid-column:1/-1;min-height:46px;font-size:1rem;font-weight:700;background:var(--ink-accent);border-color:var(--ink-accent);color:var(--ink)}
+.status button.primary:hover:not(:disabled){background:var(--ink-accent-hover);border-color:var(--ink-accent-hover)}
+.status button.primary:disabled{background:var(--ink-2);border-color:var(--ink-line);color:var(--ink-dim)}
+.status button.cancel:not(:disabled){border-color:#9c4a3e;color:#ffc9bf}
+.status button.cancel:hover:not(:disabled){background:#3b201b;border-color:var(--ink-err)}
+.status .download{grid-column:1/-1;min-height:46px;font-size:1rem;font-weight:700;background:var(--ink-text);border-color:var(--ink-text);color:var(--ink)}
+.status .download:hover{background:#fff;border-color:#fff}
+.status .download::before{content:"";width:8px;height:8px;margin-top:-4px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)}
+#error{margin:14px 0 0;font-size:.88rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+#error:empty{margin:0}
+#error:not(:empty){padding:10px 12px;border-radius:8px;background:#3b201b;border:1px solid #7a3a30;color:#ffd6cd}
+#error:not(:empty)::before{content:"エラー";display:block;margin-bottom:2px;font-size:.75rem;font-weight:700;color:#ffaa9b}
+
+/* 履歴 */
+.history{margin-top:24px}.history-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.history-head h2{margin:0}.history-item{border-top:1px solid var(--line);padding:16px 0;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.history-name{font-weight:700;overflow-wrap:anywhere}.history-info{font-size:.85rem;color:var(--text-2);margin:5px 0;overflow-wrap:anywhere}.history-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}.history-actions button{font-size:.85rem;min-height:40px}.history-empty{color:var(--text-2)}@media(max-width:640px){.history-item{flex-direction:column}.history-actions{width:100%}}
+
+/* フッター */
+footer{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);color:var(--text-2);font-size:.82rem;line-height:1.8}
+footer ul{margin:0;padding-left:1.2em}
+
+/* 画面幅 */
+@media (min-width:1700px){:root{font-size:16px}main{max-width:1440px}.layout{grid-template-columns:minmax(0,1fr) 420px}}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}.status{position:static;max-height:none;overflow:visible}}
+@media (max-width:640px){main{padding:16px 14px 28px}.app-head{flex-direction:column;align-items:flex-start}h1{font-size:1.4rem}.card{padding:18px 16px}.status{padding:18px 16px}.drop{padding:24px 14px}.path .row{flex-direction:column;align-items:stretch}.modes{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.roi-row{align-items:flex-start}}
+
+/* 動き・コントラスト */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}button:active:not(:disabled){transform:none}.running i.indeterminate{width:100%!important;transform:none;opacity:.75;background:repeating-linear-gradient(135deg,var(--ink-accent) 0 8px,#b9774f 8px 16px)}}
+@media (prefers-contrast:more){:root{--line:#9c917f;--line-strong:#6b6257;--text-2:#3d362f;--text-3:#4f473e;--placeholder:#5c544a;--ink-muted:#e2d9cd;--ink-dim:#b3a89b;--ink-line:#7a6f63}}
+@media (forced-colors:active){.mode input{appearance:auto;-webkit-appearance:auto}select{appearance:auto;-webkit-appearance:auto;background-image:none;padding-right:12px}.progress{border:1px solid CanvasText}.progress i{background:Highlight}.drop.over{border-color:Highlight}.mode:has(input:checked){border-width:2px}#error:not(:empty){border:1px solid CanvasText}.mark,.tag::before,.state::before,.model-status::before,.roi-chip::before{forced-color-adjust:none}}
+</style></head><body><main>
+<header class="app-head"><div class="brand"><span class="mark" aria-hidden="true"></span><div><h1>Mosaic Refiner</h1><p class="lead">動画を選択 → 開始。対象の検出から保存まで自動で処理</p></div></div><span class="tag">このPCで処理</span></header>
+<div class="layout"><div class="col">
+<section class="card"><h2 class="step"><span class="step-no" aria-hidden="true">1</span>動画</h2>
+<div id="drop" class="drop" tabindex="0" role="button" aria-label="動画を選択"><span class="drop-glyph" aria-hidden="true"></span><strong>動画をここへドロップ</strong><span class="muted">またはクリックして選択 · MP4 / MKV / MOV / NUT / AVI / WebM</span><input id="file" type="file" accept=".mp4,.mkv,.mov,.nut,.avi,.webm" hidden></div>
+<div class="path"><span class="field-label" aria-hidden="true">このPC内の動画パス</span><div class="row"><input id="localPath" type="text" aria-label="このPC内の動画パス" placeholder="このPC内の動画パス（コピーせず処理）"><button id="local">パスから選択</button></div></div>
+<p id="upload" class="muted upload" aria-live="polite"></p><p id="meta" class="meta" hidden></p></section>
+<section class="card"><h2 class="step"><span class="step-no" aria-hidden="true">2</span>処理の設定</h2>
+<div id="settings" hidden>
+<div class="block"><h3 class="block-title">対象の指定</h3>
+<div class="roi-row"><span id="roiLabel" class="muted roi-chip">自動検出・形状追跡</span><div class="row"><button id="showPreview">プレビューを表示</button><button id="auto" hidden>自動検出に戻す</button></div></div>
+<p class="note">映像は表示せず処理できます。手動で対象を指定するときだけ、プレビューを表示してください。</p>
+<div id="preview" class="preview" hidden><img id="image" alt="選択した動画の最初のフレーム" draggable="false"><canvas id="roiCanvas"></canvas></div>
+<p class="note roi-hint">プレビュー上をドラッグして範囲を指定します。</p>
+<p class="note">手動矩形は全編で固定。自動検出では対象の形状と移動を追跡し、小さな領域を再生成します。</p></div>
+<fieldset class="modes-set"><legend>速さと精細さのバランス</legend><div class="modes">
+<label class="mode"><input type="radio" name="mode" value="speed"><strong>速度優先</strong><span>再生成を小さめ・軽めに。細部が粗くなる場合があります。</span></label>
+<label class="mode"><input type="radio" name="mode" value="balanced" checked><strong>標準</strong><span>これまでの解像度と計算量で処理。</span></label>
+<label class="mode"><input type="radio" name="mode" value="detail"><strong>精細さ優先</strong><span>解像度と周辺の参照範囲を増やします。</span></label>
+</div><p id="modeHint" class="muted" aria-live="polite"></p></fieldset>
+<details class="advanced-wrap"><summary>詳細設定</summary><div class="adv-body">
+<fieldset class="adv-group"><legend>再生成</legend><div class="fields">
+<label class="field"><span>再生成の解像度</span><select id="renderScale"><option value="50">元の切り出しの50%</option><option value="75">75%</option><option value="100" selected>100%</option><option value="125">125%</option></select></label>
+<label class="field"><span>解像度の上限</span><select id="pixelBudget"><option value="65536">256 × 256相当</option><option value="147456">384 × 384相当</option><option value="262144" selected>512 × 512相当</option><option value="589824">768 × 768相当</option></select></label>
+<label class="field"><span>周辺の参照範囲</span><select id="cropMargin"><option value="0">余白なし</option><option value="16">16px</option><option value="32" selected>32px</option><option value="64">64px</option></select></label>
+<label class="field"><span>H3の計算量</span><select id="sampling"><option value="light">軽め（12＋6step・試験設定）</option><option value="standard" selected>標準（20＋10step）</option></select></label>
+</div><p class="note">小さな領域は最小サイズに達し、解像度を下げても計算サイズが変わらないことがあります。精細さ優先の画質向上は未確認です。</p></fieldset>
+<fieldset class="adv-group"><legend>LoRA</legend><div class="fields">
+<label class="field"><span>H3のLoRA（必須）</span><select id="loraProfile"><option value="unlocked_v2" selected>Minimax H3 Unlocked V2</option><option value="restoration">DecensoreH3</option></select></label>
+<label class="field"><span>LoRAの強度</span><input id="loraStrength" type="number" min="0.01" max="2" step="0.01" value="1"></label>
+</div><p class="note">選択したLoRAを最初の再生成と最後の仕上げへ適用する構成です。強度0は選べません。許諾とH3条件との整合は確認待ちのため、導入・推論は停止中です。拡大段は重みを使わない補間です。</p></fieldset>
+<fieldset class="adv-group"><legend>生成区間と中間ファイル</legend><div class="fields">
+<label class="field"><span>生成区間</span><select id="context"><option value="auto">自動（GPUに合わせる）</option><option value="5">5秒</option><option value="10">10秒</option><option value="15">15秒</option></select></label>
+</div><p class="note">途中素材は完成後も保持します。不要になったら、履歴から削除できます。</p></fieldset>
+</div></details></div>
+<p class="settings-empty">動画を選択すると、対象の指定・速さと精細さのバランス・詳細設定が表示されます。</p></section>
+<section class="card"><h2 class="step"><span class="step-no" aria-hidden="true">3</span>モデルの準備</h2><div class="models">
+<div class="model-row"><span id="detectorStatus" class="muted model-status"></span><button id="setupDetector" class="btn-setup" hidden>自動検出モデルを導入（約149MB）</button></div>
+<div class="model-row"><span id="restorationStatus" class="muted model-status"></span><button id="setupRestoration" class="btn-setup" hidden>補正モデルの準備を確認</button></div><p class="note">必須LoRAの許諾確認待ちです。ローカルのファイル配置や認証入力だけでは、導入・推論を有効にしません。</p>
+</div></section>
+</div>
+<section id="progressPanel" class="status"><div class="status-head"><h2 class="step"><span class="step-no" aria-hidden="true">4</span>処理と保存</h2><span class="state" aria-hidden="true"></span></div>
+<div id="phase" aria-live="polite">動画を選択してください</div><div class="progress"><i id="bar"></i></div><p id="detail" class="muted"></p>
+<div class="actions"><button id="start" class="primary" disabled>補正を開始</button><button id="cancel" class="cancel" disabled>取消し</button><button id="resume" disabled>前の処理を再開</button><button id="shutdown">アプリを終了</button><a id="output" class="download" href="/api/output" hidden>出力動画を保存</a></div><div id="error" role="alert"></div></section>
+</div>
+<section id="historyPanel" class="card history" hidden><div class="history-head"><h2>処理履歴</h2><button id="historyRefresh">履歴を更新</button></div><p class="note">履歴を開いて「前の処理を再開」を押すと、保存済みの区切りから続けます。途中の区間はやり直す場合があります。元動画・設定・実装の版が一致する必要があります。</p><div id="historyMessage" class="history-info" role="status"></div><div id="historyList"></div></section>
+<footer><p>技術検証デモです。対象領域はAIの推測で、元の情報の復元を保証しません。許可を得た素材と、利用条件を確認したモデルを使ってください。</p><p><a href="https://github.com/studio-yebisu/mosaic-refiner" target="_blank" rel="noopener noreferrer">アプリのソース（AGPL-3.0-only）</a> · <a href="https://github.com/studio-yebisu/mosaic-refiner/blob/codex/bootstrap/docs/use-conditions.md" target="_blank" rel="noopener noreferrer">利用条件</a> · <a href="https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MiniMax H3の条件</a></p><ul><li>パス指定なら原本を読み取り、別名で出力します。ドロップ・ファイル選択はこのPC内へコピーします。元動画を上書きしません。</li><li>ブラウザを閉じても処理は続きます。取消しは実行中の区間を保存してから停止します。</li><li>処理履歴と途中素材を保存します。完成後、不要になった途中素材は履歴から削除できます。原本・完成動画・処理記録は保持します。</li></ul></footer></main>
+<script>
+'use strict';
+const processingPresets=__PROCESSING_PRESETS__;
+const token=new URLSearchParams(location.hash.slice(1)).get('token')||'',$=id=>document.getElementById(id);let session=null,roi=null,busy=false,uploading=false,drag=null,connectionError=false,appClosed=false;
+function mediaUrl(path){return path+(path.includes('?')?'&':'?')+'token='+encodeURIComponent(token);}
+$('output').href=mediaUrl('/api/output');
+async function api(path,data={}){const r=await fetch('/api/'+path,{method:'POST',headers:{'Content-Type':'application/json','X-Mosaic-Token':token},body:JSON.stringify(data)});const d=await r.json();if(!r.ok)throw Error(d.error||'操作に失敗しました');return d;}
+function duration(seconds){seconds=Math.max(0,Math.floor(seconds));return `${Math.floor(seconds/60)}分${seconds%60}秒`;}
+function processingOptions(){return {mode:document.querySelector('input[name="mode"]:checked').value,render_scale_percent:Number($('renderScale').value),max_pixels:Number($('pixelBudget').value),crop_margin:Number($('cropMargin').value),sampling:$('sampling').value,lora_profile:$('loraProfile').value,lora_strength:Number($('loraStrength').value),version:3};}
+function modeHint(){const o=processingOptions(),p=processingPresets[o.mode],custom=['render_scale_percent','max_pixels','crop_margin','sampling'].some(k=>o[k]!==p[k]);$('modeHint').textContent=p.label+(custom?'（詳細変更）':'')+` · 解像度 ${o.render_scale_percent}% · 余白 ${o.crop_margin}px · H3 `+(o.sampling==='light'?'12＋6step':'20＋10step')+'。重みなしの空間2倍拡大とH3再生成を行います。';}
+function applyOptions(options){const o={...processingPresets[options?.mode||'balanced'],...(options||{})};if(options?.version===1&&!('lora_profile' in options)){o.lora_profile='restoration';o.lora_strength=1;}document.querySelector(`input[name="mode"][value="${o.mode}"]`).checked=true;for(const [id,key] of [['renderScale','render_scale_percent'],['pixelBudget','max_pixels'],['cropMargin','crop_margin'],['sampling','sampling'],['loraProfile','lora_profile'],['loraStrength','lora_strength']])$(id).value=o[key];if(o.version<3||o.lora_profile==='none'){$('error').textContent='旧モデルの履歴です。追加LoRA必須の条件で新規処理を準備してください。';}modeHint();}
+function draw(){const c=$('roiCanvas'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);if(!roi||!session)return;ctx.strokeStyle='#70ffcb';ctx.lineWidth=3;ctx.fillStyle='#70ffcb22';const x=roi.x/session.width*c.width,y=roi.y/session.height*c.height,w=roi.width/session.width*c.width,h=roi.height/session.height*c.height;ctx.fillRect(x,y,w,h);ctx.strokeRect(x,y,w,h);}
+function render(d){
+ busy=d.busy;session=d.session;const blocked=busy||uploading||d.uploading;$('historyPanel').hidden=d.application_engine!=='rust';for(const button of document.querySelectorAll('[data-history-action]'))button.disabled=blocked||historyPending||button.dataset.unavailable==='true';
+ if(session){$('meta').hidden=false;$('settings').hidden=false;$('meta').textContent=`${session.name} · ${session.width} × ${session.height}`+(session.duration?` · ${duration(Number(session.duration))}`:'')+(session.copied_input?' · コピーを処理':' · 原本を読み取り');if($('settings').dataset.id!==session.id){roi=session.spec.roi||null;$('context').value=session.spec.context_seconds||'auto';applyOptions(session.spec.processing_options);$('settings').dataset.id=session.id;}const enabled=!!session.preview_enabled;$('preview').hidden=!enabled;$('auto').hidden=!enabled;$('showPreview').hidden=enabled;if(enabled&&$('image').dataset.id!==session.id){$('image').dataset.id=session.id;$('image').src=mediaUrl('/api/preview?id='+session.id);}if(!enabled){$('image').removeAttribute('src');delete $('image').dataset.id;}}
+ if(blocked&&session)applyOptions(session.spec.processing_options);for(const radio of document.querySelectorAll('input[name="mode"]'))radio.disabled=blocked;
+ const loraBlocked=!d.h3_lora_profiles?.[$('loraProfile').value]?.execution_enabled;
+ $('phase').textContent=d.phase;$('start').disabled=!session||blocked||loraBlocked;$('resume').disabled=!session||blocked||loraBlocked||!d.can_resume;$('cancel').disabled=!busy;$('shutdown').disabled=blocked;for(const id of ['renderScale','pixelBudget','cropMargin','sampling','loraProfile','loraStrength','context','auto','local','localPath','showPreview','setupDetector','setupRestoration'])$(id).disabled=blocked;$('output').hidden=d.state!=='complete';$('progressPanel').classList.toggle('running',busy);const total=d.total,frame=d.frame,pct=total?Math.min(100,100*frame/total):d.state==='complete'?100:0;$('bar').style.width=pct+'%';$('bar').classList.toggle('indeterminate',busy&&!total);
+ const parts=[];if(d.prepass_total)parts.push(`モザイク補正 ${d.prepass_frame} / ${d.prepass_total}フレーム`);if(total)parts.push(`${Number(frame).toLocaleString()} / ${Number(total).toLocaleString()}フレーム (${pct.toFixed(1)}%)`);if(d.window_total)parts.push(`生成区間 ${d.window} / ${d.window_total}`);if(d.preparing_window&&busy)parts.push(`入力準備: 区間 ${d.preparing_window}`);if(d.generation_summary){const g=d.generation_summary;if(g.processing_options)parts.push(g.processing_options.label);if(g.canvases&&g.canvases.length)parts.push('再生成 '+g.canvases.map(c=>`${c[0]}×${c[1]} → ${c[2]}×${c[3]}`).join(' / '));if(g.following_windows)parts.push('対象に追従');if(g.shape_masks)parts.push('形状マスク');}if(d.node_stage)parts.push(d.node_stage);if(busy&&d.started_at)parts.push(`開始から ${duration(d.server_time-d.started_at)}`);if(d.wall_seconds&&!busy)parts.push(`所要時間 ${duration(d.wall_seconds)}`);if(d.context_seconds)parts.push(`生成区間 ${d.context_seconds}秒`);if(d.detection_summary&&d.detection_summary.analysis_seconds)parts.push(`検出・追跡 ${d.detection_summary.analysis_seconds.toFixed(1)}秒`);$('detail').textContent=parts.join(' · ');if(d.state==='error')$('error').textContent=d.phase;$('roiLabel').textContent=roi?`手動指定: ${roi.width} × ${roi.height}px`:'自動検出・追跡';$('detectorStatus').textContent=d.detector_ready?'自動検出モデル: 準備済み':'自動検出モデル: 未導入（規則的ブロックの検出で処理）';$('setupDetector').hidden=!!d.detector_ready;const restorationReady=d.restoration_profiles?.[$('loraProfile').value]??d.restoration_ready;$('restorationStatus').textContent=loraBlocked?'補正モデル: 必須LoRAの条件確認待ち':restorationReady?'補正モデル: 準備済み':'補正モデル: 未導入';$('setupRestoration').hidden=!!restorationReady||loraBlocked;draw();
+}
+async function refresh(){if(appClosed)return;if(!token){$('error').textContent='start-web.cmdからWebGUIを開いてください。起動時のアクセス情報が必要です。';return;}try{const r=await fetch('/api/status',{headers:{'X-Mosaic-Token':token}});if(!r.ok)throw Error('状態を取得できません');render(await r.json());if(!historyLoaded&&!historyPending)loadHistory();if(connectionError){$('error').textContent='';connectionError=false;}}catch(e){connectionError=true;$('error').textContent='サーバーに接続できません。start-web.cmdで起動してください。';}}
+function select(file){if(!file)return;if(busy||uploading){$('error').textContent='処理が終わってから動画を選択してください';return;}uploading=true;$('error').textContent='';$('upload').textContent='動画をこのPC内へ転送しています…';$('start').disabled=$('resume').disabled=true;const xhr=new XMLHttpRequest();xhr.open('POST','/api/upload');xhr.setRequestHeader('X-Mosaic-Token',token);xhr.setRequestHeader('X-Filename',encodeURIComponent(file.name));xhr.upload.onprogress=e=>{if(e.lengthComputable)$('upload').textContent=`動画転送 ${Math.round(100*e.loaded/e.total)}%`+(e.loaded===e.total?' · 時間・サイズを確認しています…':'');};xhr.onload=()=>{uploading=false;try{const d=JSON.parse(xhr.responseText);if(xhr.status!==200)throw Error(d.error);$('upload').textContent='読み込み完了';render(d);}catch(e){$('error').textContent=e.message;$('upload').textContent='読み込みに失敗しました';}refresh();};xhr.onerror=()=>{uploading=false;$('error').textContent='動画転送が中断しました';refresh();};xhr.send(file);}
+$('drop').onclick=()=>{if(!busy&&!uploading)$('file').click();};$('drop').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('drop').click();}};$('file').onchange=()=>select($('file').files[0]);for(const ev of ['dragenter','dragover'])$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('over');});$('drop').ondragleave=()=>$('drop').classList.remove('over');$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('over');if(e.dataTransfer.files.length!==1){$('error').textContent='動画は1本ずつ選択してください';return;}select(e.dataTransfer.files[0]);};window.addEventListener('dragover',e=>e.preventDefault());window.addEventListener('drop',e=>e.preventDefault());
+$('image').onload=()=>{const c=$('roiCanvas');c.width=$('image').naturalWidth;c.height=$('image').naturalHeight;draw();};function point(e){const b=$('roiCanvas').getBoundingClientRect();return [Math.round(Math.max(0,Math.min(1,(e.clientX-b.left)/b.width))*session.width),Math.round(Math.max(0,Math.min(1,(e.clientY-b.top)/b.height))*session.height)];}$('roiCanvas').onpointerdown=e=>{if(busy||uploading||!session)return;drag=point(e);$('roiCanvas').setPointerCapture(e.pointerId);};$('roiCanvas').onpointermove=e=>{if(!drag)return;const p=point(e);roi={x:Math.min(p[0],drag[0]),y:Math.min(p[1],drag[1]),width:Math.abs(p[0]-drag[0]),height:Math.abs(p[1]-drag[1])};draw();};$('roiCanvas').onpointerup=()=>{drag=null;if(roi&&(!roi.width||!roi.height))roi=null;$('roiLabel').textContent=roi?`手動指定: ${roi.width} × ${roi.height}px`:'自動検出';draw();};$('auto').onclick=()=>{roi=null;$('roiLabel').textContent='自動検出・追跡';draw();};
+async function action(id,path,data){$(id).disabled=true;$('error').textContent='';try{render(await api(path,data));}catch(e){$('error').textContent=e.message;await refresh();}}
+$('shutdown').onclick=async()=>{if(busy||uploading)return;try{await api('shutdown');appClosed=true;for(const e of document.querySelectorAll('button,input,select'))e.disabled=true;$('phase').textContent='アプリを終了しました。保存済み動画と履歴はPCに残ります。';}catch(e){$('error').textContent=e.message;}};
+$('local').onclick=()=>action('local','local',{path:$('localPath').value.trim().replace(/^"|"$/g,'')});$('localPath').onkeydown=e=>{if(e.key==='Enter')$('local').click();};$('showPreview').onclick=()=>action('showPreview','show-preview',{});$('setupDetector').onclick=()=>action('setupDetector','prepare-detector',{});$('setupRestoration').onclick=()=>action('setupRestoration','prepare-restoration',{lora_profile:$('loraProfile').value});for(const [id,path] of [['start','start'],['resume','resume'],['cancel','cancel']])$(id).onclick=()=>action(id,path,{roi,context_seconds:$('context').value==='auto'?'auto':Number($('context').value),keep_intermediates:true,processing_options:processingOptions()});for(const radio of document.querySelectorAll('input[name="mode"]'))radio.onchange=()=>{const o=processingOptions();applyOptions({...processingPresets[radio.value],lora_profile:o.lora_profile,lora_strength:o.lora_strength});};for(const id of ['renderScale','pixelBudget','cropMargin','sampling','loraProfile','loraStrength'])$(id).onchange=modeHint;modeHint();refresh();setInterval(refresh,1000);
+
+let historyPending=false,historyLoaded=false;
+const historyLabels={ready:'未開始',running:'処理中',interrupted:'中断',cancelled:'停止',failed:'失敗',error:'エラー',complete:'完成'};
+function historyNode(tag,text,cls){const e=document.createElement(tag);e.textContent=text;if(cls)e.className=cls;return e;}
+async function loadHistory(){
+ if(appClosed||historyPending||$('historyPanel').hidden)return;historyPending=true;$('historyRefresh').disabled=true;
+ try{const response=await fetch('/api/history',{headers:{'X-Mosaic-Token':token}});const data=await response.json();if(!response.ok)throw Error(data.error||'履歴を取得できません');
+  $('historyList').replaceChildren();if(!data.jobs.length)$('historyList').append(historyNode('p','開始した処理がここに残ります。','history-empty'));
+  for(const job of data.jobs){const row=historyNode('div','','history-item'),info=historyNode('div','');
+   info.append(historyNode('div',job.name||job.id,'history-name'));
+   const saved=job.total_units?`保存済み ${job.completed_units||0} / ${job.total_units}区間`:'';
+   const cleaned=job.cleanup?.state==='complete'?(job.cleanup.skipped_count?'途中素材を一部削除・変更された素材は保持':'途中素材を削除済み'):'途中素材を保持';
+   info.append(historyNode('p',[historyLabels[job.state]||job.state,saved,cleaned,new Date(job.updated_at*1000).toLocaleString()].filter(Boolean).join(' · '),'history-info'));
+   if(job.reason)info.append(historyNode('p',job.reason,'history-info'));
+   const buttons=historyNode('div','','history-actions'),open=historyNode('button',job.state==='complete'?'履歴を開く（完成）':'履歴を開く');
+   open.dataset.historyAction='select';open.dataset.unavailable=String(!job.selectable);open.disabled=busy||uploading||!job.selectable;
+   open.onclick=async()=>{open.disabled=true;try{render(await api('history-select',{job_id:job.id}));$('progressPanel').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){$('historyMessage').textContent=e.message;}await loadHistory();};buttons.append(open);
+   const clean=historyNode('button','途中素材を削除');clean.dataset.historyAction='cleanup';clean.dataset.unavailable=String(!job.cleanup_allowed||job.cleanup?.state==='complete');clean.disabled=busy||uploading||clean.dataset.unavailable==='true';
+   clean.onclick=async()=>{if(!confirm(`「${job.name||job.id}」の検査済み途中素材を削除します。原本・完成動画・履歴は残ります。途中素材の削除は取り消せません。`))return;clean.disabled=true;try{const result=await api('history-cleanup',{job_id:job.id});const c=result.cleanup;$('historyMessage').textContent=c.state==='complete'?`途中素材を削除しました（${(Number(c.bytes_freed||0)/1048576).toFixed(1)} MiB）。原本・完成動画・履歴は保持しています。`:`削除を保留しました: ${c.reason||c.error||c.state}`;}catch(e){$('historyMessage').textContent=e.message;}await loadHistory();};buttons.append(clean);row.append(info,buttons);$('historyList').append(row);
+  }
+  if(data.warnings?.length)$('historyMessage').textContent=`読み取れない履歴が${data.warnings.length}件あります。記録は保持しています。`;historyLoaded=true;
+ }catch(e){$('historyMessage').textContent=e.message;}finally{historyPending=false;$('historyRefresh').disabled=false;}
+}
+$('historyRefresh').onclick=loadHistory;
+setInterval(()=>{if(!historyLoaded||!busy)loadHistory();},5000);
+
+</script></body></html>

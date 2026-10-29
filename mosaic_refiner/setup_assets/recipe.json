@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "bootstrap_pip_version": "26.2.2",
+  "profile": "official-h3-int4-required-lora-latest-stable-v1",
+  "sources": [
+    {
+      "id": "comfy-core",
+      "repo": "Comfy-Org/ComfyUI",
+      "revision": "63be2f9b82ad0dac88a7ceaa28a9cf3154125a18",
+      "target": ".",
+      "url": "https://codeload.github.com/Comfy-Org/ComfyUI/zip/63be2f9b82ad0dac88a7ceaa28a9cf3154125a18",
+      "sha256": "e0b4b5ea7182b953787aaea5263af5365ec7616c0a56b14ab1dcc2f6e6b2e747",
+      "size_bytes": 13499302,
+      "terms_url": "https://github.com/Comfy-Org/ComfyUI/tree/63be2f9b82ad0dac88a7ceaa28a9cf3154125a18"
+    },
+    {
+      "id": "h3-motion",
+      "repo": "seitanism/ComfyUI-H3-Motion-Context-MultiRef",
+      "revision": "361624fb406b63eb6694442eac6c895fc1533a70",
+      "target": "custom_nodes/ComfyUI-H3-Motion-Context-MultiRef",
+      "url": "https://codeload.github.com/seitanism/ComfyUI-H3-Motion-Context-MultiRef/zip/361624fb406b63eb6694442eac6c895fc1533a70",
+      "sha256": "32aef6cd3b0dba16785f7947fe0783cbb1bacedcc9af1f21f33c4232522e6a12",
+      "size_bytes": 19805273,
+      "terms_url": "https://github.com/seitanism/ComfyUI-H3-Motion-Context-MultiRef/tree/361624fb406b63eb6694442eac6c895fc1533a70"
+    },
+    {
+      "id": "vhs",
+      "repo": "Kosinkadink/ComfyUI-VideoHelperSuite",
+      "revision": "4d907bee61e92c2e65af3bd6383a4e4d356126d1",
+      "target": "custom_nodes/ComfyUI-VideoHelperSuite",
+      "url": "https://codeload.github.com/Kosinkadink/ComfyUI-VideoHelperSuite/zip/4d907bee61e92c2e65af3bd6383a4e4d356126d1",
+      "sha256": "5114977eefb133c76592a5213c45ad3caa1ad7b1c2e4a77905b5ff0c48ca4363",
+      "size_bytes": 116108,
+      "terms_url": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite/tree/4d907bee61e92c2e65af3bd6383a4e4d356126d1"
+    }
+  ],
+  "python": {
+    "id": "python-3-13-17",
+    "version": "3.13.17",
+    "url": "https://www.python.org/ftp/python/3.13.17/python-3.13.17-amd64.exe",
+    "size_bytes": 29941280,
+    "sha256": "5da012101ba2e17113a9a1cd901e9ce1441086f2b7ecb5de06ec94163899a190"
+  },
+  "ffmpeg": {
+    "id": "ffmpeg-windows",
+    "url": "https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-essentials_build.zip",
+    "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+    "size_bytes": 114768076,
+    "tag": "9.0.2",
+    "license": "GPL-3.0, external build",
+    "terms_url": "https://www.gyan.dev/ffmpeg/builds/"
+  },
+  "torch_index": "https://download.pytorch.org/whl/cu130",
+  "gpu_requirements": [
+    "torch==2.14.1+cu130",
+    "torchvision==0.29.1+cu130",
+    "torchaudio==2.11.0+cu130"
+  ],
+  "requirements": [
+    "triton-windows==3.8.0.post29",
+    "comfy-kitchen==0.2.39",
+    "comfy-aimdo==0.5.6",
+    "opencv-python>=4.12,<5",
+    "imageio-ffmpeg>=0.6,<1",
+    "pillow>=13.0.0"
+  ],
+  "managed_nodes": [
+    {
+      "source": "h3_trial_chunked_mlp.py",
+      "target": "custom_nodes/h3_trial_chunked_mlp.py",
+      "sha256": "d1254fd66936f2a23c5053b2f02cc1d75bd3ffd1377f276cdced8f55f001df60"
+    },
+    {
+      "source": "mosaic_h3_public.py",
+      "target": "custom_nodes/mosaic_h3_public.py",
+      "sha256": "db4012cf20ab3cb89fa90fb75f7bc4101b9f8cfcf9000443037a12183a63451a"
+    }
+  ],
+  "core_patch": null,
+  "driver_minimum_major": 580,
+  "minimum_compute_capability": [
+    8,
+    0
+  ],
+  "sources_checked_at": "2026-10-26",
+  "verification": "Reference metadata only; explicit plan resolves current stable sources and wheels. Models remain pinned.",
+  "vc_runtime": {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/6f02464a-5e9b-486d-a506-c99a17db9a83/8995548DFFFCDE7C49987029C764355612BA6850EE09A7B6F0FDDC85BDC5C280/VC_redist.x64.exe",
+    "size_bytes": 18558944,
+    "sha256": "8995548dfffcde7c49987029c764355612ba6850ee09a7b6f0fddc85bdc5c280",
+    "version": "14.50.35719.0",
+    "minimum_version": "14.44.0.0",
+    "terms_url": "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist/"
+  }
+}
